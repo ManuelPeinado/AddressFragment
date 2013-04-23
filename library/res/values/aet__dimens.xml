@@ -1,0 +1,6 @@
+<resources>
+
+    <dimen name="aet__vertical_margin_small">8dp</dimen>
+    <dimen name="aet__action_button_size">48dp</dimen>
+
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="low_alpha" format="float" type="dimen">0.22</item>
+    <item name="medium_alpha" format="float" type="dimen">0.45</item>
+    <item name="high_alpha" format="float" type="dimen">0.9</item>
+</resources>
