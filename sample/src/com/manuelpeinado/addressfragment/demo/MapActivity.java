@@ -3,10 +3,10 @@ package com.manuelpeinado.addressfragment.demo;
 import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -16,15 +16,14 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.manuelpeinado.addressfragment.AddressFragment;
-import com.manuelpeinado.addressfragment.AddressFragment.LocationProvider;
 
-public class MapActivity extends FragmentActivity implements AddressFragment.LocationProvider,
-        AddressFragment.OnNewAddressListener, OnMyLocationChangeListener, AddressFragment.OnMyLocationClickIgnoredListener {
+public class MapActivity extends SherlockFragmentActivity implements AddressFragment.LocationProvider,
+        AddressFragment.OnNewAddressListener, OnMyLocationChangeListener,
+        AddressFragment.OnMyLocationClickIgnoredListener {
 
     private static boolean USE_MOCK_LOCATION_SOURCE = false;
     private GoogleMap mMap;
     private AddressFragment mAddressFragment;
-    private LocationListener mLocationListener;
     private boolean mFirstFixReceived;
     private Marker mMarker;
 
@@ -80,10 +79,8 @@ public class MapActivity extends FragmentActivity implements AddressFragment.Loc
 
     private void moveMarkerTo(LatLng position, Address address) {
         if (mMarker == null) {
-            mMarker = mMap.addMarker(new MarkerOptions()
-                        .position(position));
-        }
-        else {
+            mMarker = mMap.addMarker(new MarkerOptions().position(position));
+        } else {
             mMarker.setPosition(position);
         }
         mMarker.setTitle(Utils.prettyPrint(address));
@@ -92,14 +89,7 @@ public class MapActivity extends FragmentActivity implements AddressFragment.Loc
 
     @Override
     public void onMyLocationChange(Location newLocation) {
-        if (mLocationListener != null) {
-            mLocationListener.onLocationChanged(this, newLocation);
-        }
-    }
-
-    @Override
-    public void addLocationListener(LocationProvider.LocationListener listener) {
-        mLocationListener = listener;
+        mAddressFragment.setLocation(newLocation);
     }
 
     @Override

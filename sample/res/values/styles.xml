@@ -1,22 +1,5 @@
 <resources>
 
-    <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar"></style>
-
-    <style name="form_header" parent="android:Widget.Holo.Light.TextView">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:alpha">@dimen/high_alpha</item>
-        <item name="android:layout_marginLeft">@dimen/horizontal_margin_xsmall</item>
-        <item name="android:layout_marginTop">@dimen/vertical_margin_large</item>
-        <item name="android:textAllCaps">true</item>
-    </style>
-
-    <style name="form_vertical_separator">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">1dp</item>
-        <item name="android:layout_marginTop">@dimen/vertical_margin_small</item>
-        <item name="android:alpha">@dimen/low_alpha</item>
-        <item name="android:background">#000</item>
-    </style>
+    <style name="AppTheme" parent="Theme.Sherlock.Light.DarkActionBar"></style>
 
 </resources>

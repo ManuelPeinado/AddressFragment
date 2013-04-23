@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="14"
+        android:minSdkVersion="9"
         android:targetSdkVersion="17" />
 
     <permission
@@ -41,7 +41,10 @@
         <activity
             android:name="com.manuelpeinado.addressfragment.demo.MapActivity"
             android:label="@string/activity_title_map" />
-
+        <activity
+            android:name="com.manuelpeinado.addressfragment.demo.ListActivity"
+            android:label="@string/activity_title_list" />
+        
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyABVqp6vmlIepyCNWquY3Pi2sZ1KbUiaJ8" />

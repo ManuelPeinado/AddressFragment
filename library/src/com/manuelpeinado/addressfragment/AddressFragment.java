@@ -3,6 +3,8 @@ package com.manuelpeinado.addressfragment;
 import android.content.Context;
 import android.location.Address;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -22,24 +24,31 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
-import com.manuelpeinado.addressfragment.AddressFragment.LocationProvider.LocationListener;
-
 /**
  *
  */
 public class AddressFragment extends Fragment implements OnClickListener, ReverseGeocodingTask.Listener,
-        OnEditorActionListener, GeocodingTask.Listener, OnItemClickListener, OnFocusChangeListener {
+        OnEditorActionListener, GeocodingTask.Listener, OnItemClickListener, OnFocusChangeListener, LocationListener {
 
     protected static final String TAG = AddressFragment.class.getSimpleName();
-    /** This will be null if the fragment provides its own locations or does not show my location address */
+    /**
+     * This will be null if the fragment provides its own locations or does not
+     * show my location address
+     */
     private LocationProvider mLocationProvider;
     /** This object will be notified each time a new location is available */
     private OnNewAddressListener mOnNewAddressListener;
-    /** This object will be notified each time the "my location" button is clicked but the fragment does not
-     * respond to it because (ignores it) because it's already in my location mode */
+    /**
+     * This object will be notified each time the "my location" button is
+     * clicked but the fragment does not respond to it because (ignores it)
+     * because it's already in my location mode
+     */
     private OnMyLocationClickIgnoredListener mOnMyLocationClickIgnoredListener;
-    /** Last location that was reversely geocoded. Storing this information allows us to prevent repeating the geocoding
-     * of an already processed location */
+    /**
+     * Last location that was reversely geocoded. Storing this information
+     * allows us to prevent repeating the geocoding of an already processed
+     * location
+     */
     private Location mLastLocation;
     /** True if the fragment is currently showing the device's location */
     private boolean mIsUsingMyLocation = true;
@@ -47,49 +56,59 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
     private String mPrettyAddress;
     private GeocodingTask mGeocodingTask;
     private ReverseGeocodingTask mReverseGeocodingTask;
-    /** A user-initiated reverse geocoding task is one which starts because the user has clicked
-     * on the "cancel current edit" button, as opposed to the task that is executed when a new
-     * location fix is received. We need to know in which case we are in order to pass this 
-     * information to the listener, which might decide to act accordingly (for instance, a map
-     * listener may update its camera target only if the new address was user initiated, not if
-     * it was initiated itself  */
+    /**
+     * A user-initiated reverse geocoding task is one which starts because the
+     * user has clicked on the "cancel current edit" button, as opposed to the
+     * task that is executed when a new location fix is received. We need to
+     * know in which case we are in order to pass this information to the
+     * listener, which might decide to act accordingly (for instance, a map
+     * listener may update its camera target only if the new address was user
+     * initiated, not if it was initiated itself
+     */
     private boolean mIsReverseGeocodingTaskUserInitiated;
     private AutoCompleteTextView mAddressEditText;
-    /** This button is also used to cancel the current edition when the edittext has focus */
+    /**
+     * This button is also used to cancel the current edition when the edittext
+     * has focus
+     */
     private ImageView mUseMyLocationBtn;
     private ProgressBar mProgressBar;
-    /** Initially we show the progress bar until the first location fix is received from the provider.
-     * This variable allows us know whether the first fix has been received yet */
+    /**
+     * Initially we show the progress bar until the first location fix is
+     * received from the provider. This variable allows us know whether the
+     * first fix has been received yet
+     */
     private boolean mWaitingForFirstFix = true;
+    private boolean mHandlesOwnLocation;
+    private boolean mListeningToGps;
+    private boolean mListeningToNetwork;
 
     /**
-     * An objects that implements this interface can provide location fixes to the fragment, both
-     * on demand (through the {@code getLocation}) method and when they become available (through its
-     * own interface {@code LocationListener}) 
+     * An objects that implements this interface can provide location fixes to
+     * the fragment, both on demand (through the {@code getLocation}) method and
+     * when they become available (through its own interface
+     * {@code LocationListener})
      */
     public interface LocationProvider {
-        public interface LocationListener {
-            void onLocationChanged(LocationProvider sender, Location location);
-        }
-
-        void addLocationListener(LocationListener listener);
         Location getLocation();
     }
 
     /**
-     * An object that implements this interface can receive a notification every time the fragment
-     * changes its address
+     * An object that implements this interface can receive a notification every
+     * time the fragment changes its address
      */
     public interface OnNewAddressListener {
         void onNewAddress(AddressFragment sender, Address address, boolean isUserProvided);
     }
 
     /**
-     * An object that implements this interface can receive a notification every time the "use my location"
-     * button is clicked and the fragment is already in my location mode. This can be used, for instance, by 
-     * a map activity to move the camera target to the current location. Where it not for this listener, the
-     * click would go unnoticed and the user would have no way to go to the current location (we assume that
-     * the map's built-in "my location" button is not shown) 
+     * An object that implements this interface can receive a notification every
+     * time the "use my location" button is clicked and the fragment is already
+     * in my location mode. This can be used, for instance, by a map activity to
+     * move the camera target to the current location. Where it not for this
+     * listener, the click would go unnoticed and the user would have no way to
+     * go to the current location (we assume that the map's built-in
+     * "my location" button is not shown)
      */
     public interface OnMyLocationClickIgnoredListener {
         void onMyLocationClickIgnored(AddressFragment sender);
@@ -102,16 +121,36 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
     public void setOnMyLocationClickIgnoredListener(OnMyLocationClickIgnoredListener listener) {
         mOnMyLocationClickIgnoredListener = listener;
     }
-    
+
+    /**
+     * Pass null to remove the current provider
+     * 
+     * @param provider
+     */
     public void setLocationProvider(LocationProvider provider) {
-        this.mLocationProvider = provider;
-        this.mLocationProvider.addLocationListener(new LocationListener() {
-            @Override
-            public void onLocationChanged(LocationProvider sender, Location location) {
-                Log.v(TAG, "Received new location from provider: " + Utils.prettyPrint(location));
-                onNewLocation(location, false);
-            }
-        });
+        mLocationProvider = provider;
+        if (provider == null) {
+            Log.v(TAG, "Removing location provider");
+            return;
+        }
+        Log.v(TAG, "Setting new location provider");
+    }
+
+    /**
+     * This method is used by the location provider to inform us that the device
+     * location has changed
+     */
+    public void setLocation(Location newLocation) {
+        onNewLocation(newLocation, false);
+    }
+
+    public void setHandlesOwnLocation(boolean value) {
+        if (mHandlesOwnLocation == value) {
+            return;
+        }
+        Log.v(TAG, "Handling own location: " + value);
+        mHandlesOwnLocation = value;
+        updateLocationManager();
     }
 
     @Override
@@ -343,5 +382,81 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
 
     public boolean isUsingMyLocation() {
         return mIsUsingMyLocation;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateLocationManager();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        removeLocationUpdates(lm);
+    }
+
+    private void removeLocationUpdates(LocationManager lm) {
+        lm.removeUpdates(this);
+        mListeningToGps = false;
+        mListeningToNetwork = false;
+        Log.v(TAG, "Removing location updates");
+    }
+
+    private void updateLocationManager() {
+        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        if (!mHandlesOwnLocation) {
+            return;
+        }
+        boolean gpsEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        boolean networkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+        if (!gpsEnabled && !networkEnabled) {
+            showEnableLocationDialog();
+            return;
+        }
+
+        // TODO extract min time and min dist into a member variable (or constant)
+        // TODO disable verbose logs in release version
+        if (!mListeningToGps) {
+            Log.v(TAG, "Requesting GPS location updates");
+            lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30 * 1000, 200, this);
+            mListeningToGps = true;
+        }
+        if (!mListeningToNetwork) {
+            if (!gpsEnabled && networkEnabled) {
+                Log.v(TAG, "Requesting NETWORK location updates because GPS is disabled");
+                lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30 * 1000, 200, this);
+                mListeningToNetwork = true;
+            }
+        }
+    }
+
+    private void showEnableLocationDialog() {
+        // TODO
+    }
+
+    @Override
+    public void onLocationChanged(Location newLocation) {
+        Log.v(TAG, "Received location " + Utils.prettyPrint(newLocation) + " from " + newLocation.getProvider());
+        if (!Utils.isBetterLocation(newLocation, mLastLocation)) {
+            Log.v(TAG, "New location is not significantly better than previous one; ignoring it");
+        }
+        onNewLocation(newLocation, false);
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        updateLocationManager();
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        updateLocationManager();
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
     }
 }
