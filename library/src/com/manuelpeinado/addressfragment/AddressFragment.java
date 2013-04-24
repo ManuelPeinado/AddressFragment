@@ -3,8 +3,6 @@ package com.manuelpeinado.addressfragment;
 import android.content.Context;
 import android.location.Address;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -28,7 +26,7 @@ import android.widget.TextView.OnEditorActionListener;
  *
  */
 public class AddressFragment extends Fragment implements OnClickListener, ReverseGeocodingTask.Listener,
-        OnEditorActionListener, GeocodingTask.Listener, OnItemClickListener, OnFocusChangeListener, LocationListener {
+        OnEditorActionListener, GeocodingTask.Listener, OnItemClickListener, OnFocusChangeListener {
 
     protected static final String TAG = AddressFragment.class.getSimpleName();
     /**
@@ -73,15 +71,9 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
      */
     private ImageView mUseMyLocationBtn;
     private ProgressBar mProgressBar;
-    /**
-     * Initially we show the progress bar until the first location fix is
-     * received from the provider. This variable allows us know whether the
-     * first fix has been received yet
-     */
-    private boolean mWaitingForFirstFix = true;
-    private boolean mHandlesOwnLocation;
-    private boolean mListeningToGps;
-    private boolean mListeningToNetwork;
+    private boolean mIsLocationProviderPaused = true;
+    private boolean mWaitingForFirstLocationFix;
+    private boolean mShowingProgressBar;
 
     /**
      * An objects that implements this interface can provide location fixes to
@@ -90,6 +82,8 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
      * {@code LocationListener})
      */
     public interface LocationProvider {
+        void setAddressFragment(AddressFragment af);
+
         Location getLocation();
     }
 
@@ -133,6 +127,9 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
             Log.v(TAG, "Removing location provider");
             return;
         }
+        if (!mIsLocationProviderPaused) {
+            resumeLocationProvider();
+        }
         Log.v(TAG, "Setting new location provider");
     }
 
@@ -140,17 +137,28 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
      * This method is used by the location provider to inform us that the device
      * location has changed
      */
-    public void setLocation(Location newLocation) {
-        onNewLocation(newLocation, false);
+    public void setLocation(Location newLocation, boolean isUserInitiated) {
+        if (mWaitingForFirstLocationFix) {
+            mWaitingForFirstLocationFix = false;
+            hideProgressBar();
+        }
+        if (isUserInitiated) {
+            // If the provider sends a user-initiated location, we can no longer be in "using 
+            // my location", as any new fixes would overwrite the location set by the user
+            mIsUsingMyLocation = false;
+            pauseLocationProvider();
+        }
+        else if (mIsLocationProviderPaused) {
+            // We shouldn't receive non user-initiated locations from the provider, but in case
+            // we receive one anyway we have to ignore it
+            return;
+        }
+        onNewLocation(newLocation, isUserInitiated);
     }
 
     public void setHandlesOwnLocation(boolean value) {
-        if (mHandlesOwnLocation == value) {
-            return;
-        }
         Log.v(TAG, "Handling own location: " + value);
-        mHandlesOwnLocation = value;
-        updateLocationManager();
+        setLocationProvider(new BuiltInLocationProvider());
     }
 
     @Override
@@ -179,19 +187,12 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
     /**
      * @param newLocation
      * @param isUserInitiated
-     * @param force
-     *            Forces the new location to be applied event if it's equal to
-     *            the latest one
      */
     private void onNewLocation(Location newLocation, boolean isUserInitiated) {
-        if (mWaitingForFirstFix) {
-            mProgressBar.setVisibility(View.INVISIBLE);
-            mWaitingForFirstFix = false;
-        }
         // We use the hasFocus test to find out when the user has started interaction with the edit text, 
         // at which point we must stop listening to location updates because we don't want to annoy the
         // user by changing the contents of the edittext when she is in the middle of writing an address
-        if (mIsUsingMyLocation && !mAddressEditText.hasFocus()) {
+        if (!mAddressEditText.hasFocus()) {
             if (Utils.isDifferentLocation(mLastLocation, newLocation)) {
                 startReverseGeocodingTask(newLocation, isUserInitiated);
             } else {
@@ -203,7 +204,6 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
     private void startReverseGeocodingTask(Location location, boolean isUserInitiated) {
         cancelPendingTasks();
         Log.v(TAG, "Starting reverse geocoding of location " + Utils.prettyPrint(location));
-        mLastLocation = location;
         mIsReverseGeocodingTaskUserInitiated = isUserInitiated;
         mReverseGeocodingTask = new ReverseGeocodingTask(getActivity());
         mReverseGeocodingTask.setListener(this);
@@ -212,10 +212,15 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
 
     @Override
     public void onReverseGeocodingResultReady(ReverseGeocodingTask sender, Address result) {
-        hideProgressBar();
         mReverseGeocodingTask = null;
+        if (result == null) {
+            // TODO use a resource for this string
+            Utils.longToast(getActivity(), "Location could not be resolved");
+            return;
+        }
+        mLastLocation = sender.getLocation();
         String newPrettyAddress = Utils.prettyPrint(result);
-        Log.v(TAG, "Reverse geocoding of location " + Utils.prettyPrint(sender.getLocation())
+        Log.v(TAG, "Reverse geocoding of location " + Utils.prettyPrint(mLastLocation)
                 + " finished; address is " + newPrettyAddress);
         if (newPrettyAddress.equals(mPrettyAddress)) {
             Log.v(TAG, "Ignoring new address because it's the same as previous one");
@@ -256,6 +261,7 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
     public void onFocusChange(View v, boolean hasFocus) {
         if (hasFocus) {
             mUseMyLocationBtn.setImageResource(R.drawable.ic_navigation_cancel);
+            pauseLocationProvider();
         } else {
             mUseMyLocationBtn.setImageResource(R.drawable.ic_device_access_location_found);
         }
@@ -312,11 +318,19 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
     }
 
     private void showProgressBar() {
+        if (mShowingProgressBar) {
+            return;
+        }
+        mShowingProgressBar = true;
         mProgressBar.setVisibility(View.VISIBLE);
         mUseMyLocationBtn.setVisibility(View.INVISIBLE);
     }
 
     private void hideProgressBar() {
+        if (!mShowingProgressBar) {
+            return;
+        }
+        mShowingProgressBar = false;
         mProgressBar.setVisibility(View.INVISIBLE);
         mUseMyLocationBtn.setVisibility(View.VISIBLE);
     }
@@ -341,17 +355,16 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
                 // If we were not on "use my location" mode and the button is pressed, we activate
                 // that mode and apply 
                 mIsUsingMyLocation = true;
-                applyMostRecentLocation();
+                mLastLocation = null;
+                resumeLocationProvider();
             }
         }
     }
 
     private void cancelCurrentEdit() {
         if (mIsUsingMyLocation) {
-            // If we were on "my location" mode when the edit began, we apply the latest fix, 
-            // which has probably been received (and ignored) while the edittext had focus
             clearEditTextFocus();
-            applyMostRecentLocation();
+            resumeLocationProvider();
         } else {
             // If we were not on "my location" mode when the edit began, we restore the address
             // that was in the edittext when the edit began
@@ -366,12 +379,21 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
      * "use my location" mode
      */
     private void applyMostRecentLocation() {
-        // We set these two variables to null to force the update of everything, otherwise
-        // inside "onNewLocation" we would detect that things haven't changed and we would 
-        // not do anything
-        mLastLocation = null;
-        mPrettyAddress = null;
-        onNewLocation(mLocationProvider.getLocation(), true);
+        if (mLocationProvider != null) {
+            Location mostRecentLocation = mLocationProvider.getLocation();
+            if (mostRecentLocation == null) {
+                mWaitingForFirstLocationFix = true;
+                showProgressBar();
+            }
+            else {
+                // We set these two variables to null to force the update of everything, otherwise
+                // inside "onNewLocation" we would detect that things haven't changed and we would 
+                // not do anything
+                mLastLocation = null;
+                mPrettyAddress = null;
+                onNewLocation(mostRecentLocation, true);
+            }
+        }
     }
 
     private void clearEditTextFocus() {
@@ -387,76 +409,33 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
     @Override
     public void onResume() {
         super.onResume();
-        updateLocationManager();
+        resumeLocationProvider();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        removeLocationUpdates(lm);
+        pauseLocationProvider();
     }
 
-    private void removeLocationUpdates(LocationManager lm) {
-        lm.removeUpdates(this);
-        mListeningToGps = false;
-        mListeningToNetwork = false;
-        Log.v(TAG, "Removing location updates");
-    }
-
-    private void updateLocationManager() {
-        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        if (!mHandlesOwnLocation) {
-            return;
-        }
-        boolean gpsEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        boolean networkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-        if (!gpsEnabled && !networkEnabled) {
-            showEnableLocationDialog();
-            return;
-        }
-
-        // TODO extract min time and min dist into a member variable (or constant)
-        // TODO disable verbose logs in release version
-        if (!mListeningToGps) {
-            Log.v(TAG, "Requesting GPS location updates");
-            lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30 * 1000, 200, this);
-            mListeningToGps = true;
-        }
-        if (!mListeningToNetwork) {
-            if (!gpsEnabled && networkEnabled) {
-                Log.v(TAG, "Requesting NETWORK location updates because GPS is disabled");
-                lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30 * 1000, 200, this);
-                mListeningToNetwork = true;
-            }
+    private void resumeLocationProvider() {
+        mIsLocationProviderPaused = false;
+        if (mIsUsingMyLocation && mLocationProvider != null) {
+            Log.v(TAG, "Resuming location provider");
+            mLocationProvider.setAddressFragment(this);
+            applyMostRecentLocation();
         }
     }
-
-    private void showEnableLocationDialog() {
-        // TODO
-    }
-
-    @Override
-    public void onLocationChanged(Location newLocation) {
-        Log.v(TAG, "Received location " + Utils.prettyPrint(newLocation) + " from " + newLocation.getProvider());
-        if (!Utils.isBetterLocation(newLocation, mLastLocation)) {
-            Log.v(TAG, "New location is not significantly better than previous one; ignoring it");
+    
+    private void pauseLocationProvider() {
+        if (mWaitingForFirstLocationFix) {
+            mWaitingForFirstLocationFix = false;
+            hideProgressBar();
         }
-        onNewLocation(newLocation, false);
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        updateLocationManager();
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-        updateLocationManager();
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
+        mIsLocationProviderPaused = true;
+        if (mLocationProvider != null) {
+            Log.v(TAG, "Pausing location provider");
+            mLocationProvider.setAddressFragment(null);
+        }
     }
 }

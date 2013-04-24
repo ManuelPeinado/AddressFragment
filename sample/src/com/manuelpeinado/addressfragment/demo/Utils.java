@@ -36,4 +36,8 @@ public class Utils extends com.manuelpeinado.addressfragment.Utils {
     public static LatLng locationToLatLng(Location location) {
         return new LatLng(location.getLatitude(), location.getLongitude());
     }
+
+    public static Location latLngToLocation(LatLng point) {
+        return newLocation(point.latitude, point.longitude);
+    }
 }

@@ -2,8 +2,10 @@ package com.manuelpeinado.addressfragment;
 
 import java.util.Locale;
 
+import android.content.Context;
 import android.location.Address;
 import android.location.Location;
+import android.widget.Toast;
 
 public class Utils {
     private static final String LOCATION_FMT_STR = "%.4f, %.4f";
@@ -109,5 +111,13 @@ public class Utils {
             return provider2 == null;
         }
         return provider1.equals(provider2);
+    }
+
+    public static void longToast(Context ctx, String text) {
+        Toast.makeText(ctx, text, Toast.LENGTH_LONG).show();
+    }
+
+    public static void shortToast(Context ctx, String text) {
+        Toast.makeText(ctx, text, Toast.LENGTH_SHORT).show();
     }
 }
