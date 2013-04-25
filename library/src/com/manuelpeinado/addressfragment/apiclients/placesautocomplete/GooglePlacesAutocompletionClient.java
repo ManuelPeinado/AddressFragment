@@ -1,12 +1,13 @@
-package com.manuelpeinado.addressfragment;
+package com.manuelpeinado.addressfragment.apiclients.placesautocomplete;
 
 import java.net.URLEncoder;
 import java.util.List;
 
+
 import us.monoid.web.Resty;
 
 import com.google.gson.Gson;
-import com.manuelpeinado.addressfragment.gson.PlacesAutocompletionResult;
+import com.manuelpeinado.addressfragment.Place;
 
 public class GooglePlacesAutocompletionClient extends PlacesAutocompletionClient {
     

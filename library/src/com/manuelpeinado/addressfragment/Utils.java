@@ -120,4 +120,12 @@ public class Utils {
     public static void shortToast(Context ctx, String text) {
         Toast.makeText(ctx, text, Toast.LENGTH_SHORT).show();
     }
+
+    public static Location newLocation(double latitude, double longitude) {
+        Location result = new Location((String) null);
+        result.setLatitude(latitude);
+        result.setLongitude(longitude);
+        return result;
+    }
+
 }

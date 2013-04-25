@@ -1,0 +1,55 @@
+package com.manuelpeinado.addressfragment.demo.apiclients.wikilocation;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.List;
+
+import us.monoid.web.Resty;
+import android.os.AsyncTask;
+
+import com.google.gson.Gson;
+import com.manuelpeinado.addressfragment.Callback;
+
+public class WikiLocationClient {
+
+    private static final String BASE_URL = "http://api.wikilocation.org/articles?";
+    private static final String ENCODING = "UTF-8";
+    private static final String ARGS = "lat=%s&lng=%s&radius=%s&limit=%s";
+
+    public List<Article> getArticlesSync(double lat, double lon, int radius, int limit) {
+        try {
+            String args = String.format(ARGS, encode(lat), encode(lon), encode(radius), encode(limit));
+            String json = new Resty().text(BASE_URL + args).toString();
+            Gson gson = new Gson();
+            WikiLocationResult result = gson.fromJson(json, WikiLocationResult.class);
+            return result.articles;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private String encode(int limit) throws UnsupportedEncodingException {
+        return URLEncoder.encode(Integer.toString(limit), ENCODING);
+    }
+
+    private String encode(double lat) throws UnsupportedEncodingException {
+        return URLEncoder.encode(Double.toString(lat), ENCODING);
+    }
+
+    public final void sendRequest(final double lat, final double lon, final int radius, final int limit,
+            final Callback<List<Article>> callback) {
+        new AsyncTask<Void, Void, List<Article>>() {
+            @Override
+            protected List<Article> doInBackground(Void... params) {
+                return getArticlesSync(lat, lon, radius, limit);
+            }
+
+            @Override
+            protected void onPostExecute(List<Article> result) {
+                callback.onResultReady(result);
+            }
+        }.execute();
+    }
+
+}

@@ -75,15 +75,8 @@ public class MapActivity extends SherlockFragmentActivity implements AddressFrag
     }
 
     @Override
-    public void onNewAddress(AddressFragment sender, Address address, boolean isUserProvided) {
-        LatLng latLng = Utils.addressToLatLng(address);
-        if (sender.isUsingMyLocation()) {
-            // This is necessary because the location contained in "address" corresponds to a real
-            // address, and thus does not match exactly the actual location of the device. Without
-            // this adjustment the marker would appear slightly displaced with respect to the my location
-            // marker, which looks awful
-            latLng = Utils.locationToLatLng(mMap.getMyLocation());
-        }
+    public void onNewAddress(AddressFragment sender, Address address, Location location, boolean isUserProvided) {
+        LatLng latLng = Utils.locationToLatLng(location);
         moveMarkerTo(latLng, address);
         if (!mFirstFixReceived || isUserProvided) {
             CameraUpdate update = CameraUpdateFactory.newLatLng(latLng);

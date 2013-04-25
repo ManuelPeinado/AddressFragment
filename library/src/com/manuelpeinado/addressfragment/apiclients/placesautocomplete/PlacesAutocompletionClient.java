@@ -1,6 +1,9 @@
-package com.manuelpeinado.addressfragment;
+package com.manuelpeinado.addressfragment.apiclients.placesautocomplete;
 
 import java.util.List;
+
+import com.manuelpeinado.addressfragment.Callback;
+import com.manuelpeinado.addressfragment.Place;
 
 import android.os.AsyncTask;
 

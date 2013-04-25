@@ -26,13 +26,6 @@ public class Utils extends com.manuelpeinado.addressfragment.Utils {
         return String.format(Locale.getDefault(), LOCATION_FMT_STR, latLng.latitude, latLng.longitude);
     }
 
-    public static Location newLocation(double latitude, double longitude) {
-        Location result = new Location((String) null);
-        result.setLatitude(latitude);
-        result.setLongitude(longitude);
-        return result;
-    }
-
     public static LatLng locationToLatLng(Location location) {
         return new LatLng(location.getLatitude(), location.getLongitude());
     }

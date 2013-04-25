@@ -1,4 +1,4 @@
-package com.manuelpeinado.addressfragment.gson;
+package com.manuelpeinado.addressfragment.apiclients.placesautocomplete;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,6 @@ import com.manuelpeinado.addressfragment.Place;
 
 public class PlacesAutocompletionResult {
     private List<Prediction> predictions;
-    private String status;
 
     public List<Place> getPlaces() {
         List<Place> result = new ArrayList<Place>();

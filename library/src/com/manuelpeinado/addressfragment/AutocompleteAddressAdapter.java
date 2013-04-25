@@ -2,6 +2,9 @@ package com.manuelpeinado.addressfragment;
 
 import java.util.List;
 
+import com.manuelpeinado.addressfragment.apiclients.placesautocomplete.GooglePlacesAutocompletionClient;
+import com.manuelpeinado.addressfragment.apiclients.placesautocomplete.PlacesAutocompletionClient;
+
 import android.content.Context;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;

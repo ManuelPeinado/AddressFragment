@@ -92,7 +92,7 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
      * time the fragment changes its address
      */
     public interface OnNewAddressListener {
-        void onNewAddress(AddressFragment sender, Address address, boolean isUserProvided);
+        void onNewAddress(AddressFragment sender, Address address, Location location, boolean isUserProvided);
     }
 
     /**
@@ -234,7 +234,8 @@ public class AddressFragment extends Fragment implements OnClickListener, Revers
 
     private void notifyListener(boolean isUserProvided) {
         if (mOnNewAddressListener != null) {
-            mOnNewAddressListener.onNewAddress(this, mAddress, isUserProvided);
+            Location location = Utils.addressToLocation(mAddress);
+            mOnNewAddressListener.onNewAddress(this, mAddress, location, isUserProvided);
         }
     }
 

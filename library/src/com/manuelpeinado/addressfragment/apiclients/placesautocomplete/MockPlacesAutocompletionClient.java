@@ -1,7 +1,10 @@
-package com.manuelpeinado.addressfragment;
+package com.manuelpeinado.addressfragment.apiclients.placesautocomplete;
 
 import java.util.Arrays;
 import java.util.List;
+
+import com.manuelpeinado.addressfragment.Place;
+import com.manuelpeinado.addressfragment.Utils;
 
 public class MockPlacesAutocompletionClient extends PlacesAutocompletionClient {
 
