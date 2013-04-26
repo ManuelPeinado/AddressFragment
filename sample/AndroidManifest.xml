@@ -44,6 +44,9 @@
         <activity
             android:name="com.manuelpeinado.addressfragment.demo.ListActivity"
             android:label="@string/activity_title_list" />
+        <activity
+            android:name="com.manuelpeinado.addressfragment.demo.DirectionsActivity"
+            android:label="@string/activity_title_directions" />
         
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"

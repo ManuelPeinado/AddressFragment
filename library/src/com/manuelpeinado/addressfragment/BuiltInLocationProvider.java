@@ -7,23 +7,24 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.manuelpeinado.addressfragment.AddressFragment.LocationProvider;
+import com.manuelpeinado.addressfragment.AddressView.LocationProvider;
+
 
 public class BuiltInLocationProvider implements LocationProvider, LocationListener {
 
     protected static final String TAG = BuiltInLocationProvider.class.getSimpleName();
-    private AddressFragment mAddressFragment;
+    private AddressView mAddressFragment;
     private boolean mListeningToGps;
     private boolean mListeningToNetwork;
     private Location mLastLocation;
 
     @Override
-    public void setAddressFragment(AddressFragment addressFragment) {
-        if (mAddressFragment == addressFragment) {
+    public void setAddressView(AddressView addressView) {
+        if (mAddressFragment == addressView) {
             return;
         }
         cancelLocationUpdates();
-        this.mAddressFragment = addressFragment;
+        this.mAddressFragment = addressView;
         requestLocationUpdates();
     }
 
@@ -70,7 +71,7 @@ public class BuiltInLocationProvider implements LocationProvider, LocationListen
     }
     
     private LocationManager getLocationManager() {
-        return (LocationManager) mAddressFragment.getActivity().getSystemService(Context.LOCATION_SERVICE);
+        return (LocationManager) mAddressFragment.getContext().getSystemService(Context.LOCATION_SERVICE);
     }
 
     @Override

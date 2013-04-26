@@ -7,5 +7,7 @@
     <string name="end_address">End address</string>
     <string name="activity_title_map">Map demo</string>
     <string name="activity_title_list">List demo</string>
+    <string name="activity_title_directions">Directions demo</string>
     <string name="could_not_load_map">Could not load map</string>
+    <string name="action_directions">Directions</string>
 </resources>

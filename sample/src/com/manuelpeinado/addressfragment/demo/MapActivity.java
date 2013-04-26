@@ -18,16 +18,17 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.manuelpeinado.addressfragment.AddressFragment;
+import com.manuelpeinado.addressfragment.AddressView;
 
-public class MapActivity extends SherlockFragmentActivity implements AddressFragment.LocationProvider,
-        AddressFragment.OnNewAddressListener, OnMyLocationChangeListener,
-        AddressFragment.OnMyLocationClickIgnoredListener, OnMapClickListener {
+public class MapActivity extends SherlockFragmentActivity implements AddressView.LocationProvider,
+        AddressView.OnNewAddressListener, OnMyLocationChangeListener,
+        AddressView.OnMyLocationClickIgnoredListener, OnMapClickListener {
 
     private static boolean USE_MOCK_LOCATION_SOURCE = false;
     private GoogleMap mMap;
-    private AddressFragment mAddressFragment;
     private boolean mFirstFixReceived;
     private Marker mMarker;
+    private AddressView mAddressView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,10 +48,11 @@ public class MapActivity extends SherlockFragmentActivity implements AddressFrag
             mMap.setLocationSource(new MockLocationSource());
         }
         mMap.setOnMapClickListener(this);
-        mAddressFragment = (AddressFragment) fm.findFragmentById(R.id.address);
-        mAddressFragment.setLocationProvider(this);
-        mAddressFragment.setOnNewAddressListener(this);
-        mAddressFragment.setOnMyLocationClickIgnoredListener(this);
+        AddressFragment addressFragment = (AddressFragment) fm.findFragmentById(R.id.address);
+        mAddressView = addressFragment.getAddressView();
+        mAddressView.setLocationProvider(this);
+        mAddressView.setOnNewAddressListener(this);
+        mAddressView.setOnMyLocationClickIgnoredListener(this);
     }
 
     @Override
@@ -75,7 +77,7 @@ public class MapActivity extends SherlockFragmentActivity implements AddressFrag
     }
 
     @Override
-    public void onNewAddress(AddressFragment sender, Address address, Location location, boolean isUserProvided) {
+    public void onNewAddress(AddressView sender, Address address, Location location, boolean isUserProvided) {
         LatLng latLng = Utils.locationToLatLng(location);
         moveMarkerTo(latLng, address);
         if (!mFirstFixReceived || isUserProvided) {
@@ -97,11 +99,11 @@ public class MapActivity extends SherlockFragmentActivity implements AddressFrag
 
     @Override
     public void onMyLocationChange(Location newLocation) {
-        mAddressFragment.setLocation(newLocation, false);
+        mAddressView.setLocation(newLocation, false);
     }
 
     @Override
-    public void setAddressFragment(AddressFragment addressFragment) {
+    public void setAddressView(AddressView addressView) {
         // We don't need to do anything here because we already have the fragment
         // Ideally we would do something like "isPaused = addressFragment != null"
         // and then don't call addressFragment.setLocation() when paused, but that's
@@ -115,7 +117,7 @@ public class MapActivity extends SherlockFragmentActivity implements AddressFrag
     }
 
     @Override
-    public void onMyLocationClickIgnored(AddressFragment sender) {
+    public void onMyLocationClickIgnored(AddressView sender) {
         LatLng latLng = Utils.locationToLatLng(mMap.getMyLocation());
         CameraUpdate update = CameraUpdateFactory.newLatLng(latLng);
         mMap.animateCamera(update);
@@ -123,6 +125,6 @@ public class MapActivity extends SherlockFragmentActivity implements AddressFrag
 
     @Override
     public void onMapClick(LatLng point) {
-        mAddressFragment.setLocation(Utils.latLngToLocation(point), true);
+        mAddressView.setLocation(Utils.latLngToLocation(point), true);
     }
 }

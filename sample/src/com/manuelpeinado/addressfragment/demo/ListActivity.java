@@ -16,7 +16,8 @@ import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.manuelpeinado.addressfragment.AddressFragment;
-import com.manuelpeinado.addressfragment.AddressFragment.OnNewAddressListener;
+import com.manuelpeinado.addressfragment.AddressView;
+import com.manuelpeinado.addressfragment.AddressView.OnNewAddressListener;
 import com.manuelpeinado.addressfragment.Callback;
 import com.manuelpeinado.addressfragment.demo.apiclients.wikilocation.Article;
 import com.manuelpeinado.addressfragment.demo.apiclients.wikilocation.WikiLocationClient;
@@ -25,7 +26,7 @@ public class ListActivity extends SherlockFragmentActivity implements OnNewAddre
         OnItemClickListener {
 
     private ListView mListView;
-    private AddressFragment mAddressFragment;
+    private AddressView mAddressView;
     private WikiLocationClient client = new WikiLocationClient();
     private ArrayAdapter<Article> mAdapter;
 
@@ -37,13 +38,14 @@ public class ListActivity extends SherlockFragmentActivity implements OnNewAddre
         mListView.setOnItemClickListener(this);
 
         FragmentManager fm = getSupportFragmentManager();
-        mAddressFragment = (AddressFragment) fm.findFragmentById(R.id.address);
-        mAddressFragment.setHandlesOwnLocation(true);
-        mAddressFragment.setOnNewAddressListener(this);
+        AddressFragment addressFragment = (AddressFragment) fm.findFragmentById(R.id.address);
+        mAddressView = addressFragment.getAddressView();
+        mAddressView.setHandlesOwnLocation(true);
+        mAddressView.setOnNewAddressListener(this);
     }
 
     @Override
-    public void onNewAddress(AddressFragment sender, Address address, Location location, boolean isUserProvided) {
+    public void onNewAddress(AddressView sender, Address address, Location location, boolean isUserProvided) {
         client.sendRequest(location.getLatitude(), location.getLongitude(), 1000, 10, this);
     }
 
