@@ -4,6 +4,7 @@ import android.content.Context;
 import android.location.Address;
 import android.location.Location;
 import android.support.v4.app.FragmentActivity;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -75,6 +76,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private boolean mIsLocationProviderPaused = true;
     private boolean mWaitingForFirstLocationFix;
     private boolean mShowingProgressBar;
+    private boolean mPaused = true;
 
     /**
      * An objects that implements this interface can provide location fixes to
@@ -112,7 +114,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     public AddressView(Context context) {
         this(context, null);
     }
-    
+
     public AddressView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -131,6 +133,8 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         mAddressEditText.setOnFocusChangeListener(this);
         mUseMyLocationBtn = (ImageView) findViewById(R.id.useMyLocationButton);
         mUseMyLocationBtn.setOnClickListener(this);
+
+        updateTextInMyLocationMode();
     }
 
     public void setOnNewAddressListener(OnNewAddressListener listener) {
@@ -151,6 +155,10 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         if (provider == null) {
             Log.v(TAG, "Removing location provider");
             return;
+        }
+        if (mIsUsingMyLocation) {
+            // If we were showing "My location" now we need to show the hint "Waiting for location"
+            mAddressEditText.setText("");
         }
         if (!mIsLocationProviderPaused) {
             resumeLocationProvider();
@@ -183,6 +191,40 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     public void setHandlesOwnLocation(boolean value) {
         Log.v(TAG, "Handling own location: " + value);
         setLocationProvider(new BuiltInLocationProvider());
+    }
+
+    public void setUsingMyLocation(boolean value) {
+        if (mIsUsingMyLocation == value) {
+            return;
+        }
+        mIsUsingMyLocation = value;
+        if (mIsUsingMyLocation) {
+            mLastLocation = null;
+            if (mLocationProvider != null && !mPaused) {
+                resumeLocationProvider();
+            }
+            updateTextInMyLocationMode();
+        }
+        else {
+            if (mLocationProvider == null) {
+                mAddressEditText.setText("");
+                showDefaultHint();
+            }
+            else {
+                pauseLocationProvider();
+            }
+        }
+    }
+
+    private void updateTextInMyLocationMode() {
+        if (!mIsUsingMyLocation) {
+            return;
+        }
+        if (mLocationProvider == null) {
+            mAddressEditText.setText(R.string.aet__my_location);
+        } else if (mWaitingForFirstLocationFix) {
+            showWaitingForLocationHint();
+        }
     }
 
     private void updateText() {
@@ -237,12 +279,14 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         mPrettyAddress = newPrettyAddress;
         mAddress = result;
         updateText();
-        notifyListener(mIsReverseGeocodingTaskUserInitiated);
+        notifyListener(mLastLocation, mIsReverseGeocodingTaskUserInitiated);
     }
 
-    private void notifyListener(boolean isUserProvided) {
+    private void notifyListener(Location location, boolean isUserProvided) {
         if (mOnNewAddressListener != null) {
-            Location location = Utils.addressToLocation(mAddress);
+            if (location == null) {
+                location = Utils.addressToLocation(mAddress);
+            }
             mOnNewAddressListener.onNewAddress(this, mAddress, location, isUserProvided);
         }
     }
@@ -252,10 +296,11 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
             clearEditTextFocus();
             String addressText = getAddressText();
-            // TODO check that addressText is not too short
-            Log.v(TAG, "Editor action IME_ACTION_SEARCH");
-            mIsUsingMyLocation = false;
-            startGeocoding(addressText);
+            if (!TextUtils.isEmpty(addressText)) {
+                Log.v(TAG, "Editor action IME_ACTION_SEARCH");
+                mIsUsingMyLocation = false;
+                startGeocoding(addressText);
+            }
             return true;
         }
         return false;
@@ -301,7 +346,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         mPrettyAddress = newPrettyAddress;
         mAddress = result;
         updateText();
-        notifyListener(true);
+        notifyListener(null, true);
     }
 
     @Override
@@ -323,7 +368,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     private String getAddressText() {
-        return mAddressEditText.getText().toString();
+        return mAddressEditText.getText().toString().trim();
     }
 
     private void showProgressBar() {
@@ -355,17 +400,12 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             cancelCurrentEdit();
         } else {
             // This means that the button has the semantics "use my location"
-
             if (mIsUsingMyLocation) {
                 if (mOnMyLocationClickIgnoredListener != null) {
                     mOnMyLocationClickIgnoredListener.onMyLocationClickIgnored(this);
                 }
             } else {
-                // If we were not on "use my location" mode and the button is pressed, we activate
-                // that mode and apply 
-                mIsUsingMyLocation = true;
-                mLastLocation = null;
-                resumeLocationProvider();
+                setUsingMyLocation(true);
             }
         }
     }
@@ -373,6 +413,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private void cancelCurrentEdit() {
         if (mIsUsingMyLocation) {
             clearEditTextFocus();
+            updateTextInMyLocationMode();
             resumeLocationProvider();
         } else {
             // If we were not on "my location" mode when the edit began, we restore the address
@@ -392,6 +433,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             Location mostRecentLocation = mLocationProvider.getLocation();
             if (mostRecentLocation == null) {
                 mWaitingForFirstLocationFix = true;
+                updateTextInMyLocationMode();
                 showProgressBar();
             } else {
                 // We set these two variables to null to force the update of everything, otherwise
@@ -402,6 +444,14 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
                 onNewLocation(mostRecentLocation, true);
             }
         }
+    }
+
+    private void showWaitingForLocationHint() {
+        mAddressEditText.setHint(R.string.aet__waiting_for_location);
+    }
+
+    private void showDefaultHint() {
+        mAddressEditText.setHint(R.string.aet__address_edit_text_hint);
     }
 
     private void clearEditTextFocus() {
@@ -415,10 +465,12 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     public void resume() {
+        mPaused  = false;
         resumeLocationProvider();
     }
 
     public void pause() {
+        mPaused = true;
         pauseLocationProvider();
     }
 
@@ -432,8 +484,12 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     private void pauseLocationProvider() {
+        if (mIsLocationProviderPaused) {
+            return;
+        }
         if (mWaitingForFirstLocationFix) {
             mWaitingForFirstLocationFix = false;
+            showDefaultHint();
             hideProgressBar();
         }
         mIsLocationProviderPaused = true;

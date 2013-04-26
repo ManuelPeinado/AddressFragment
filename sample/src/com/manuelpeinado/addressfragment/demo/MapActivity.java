@@ -29,6 +29,7 @@ public class MapActivity extends SherlockFragmentActivity implements AddressView
     private boolean mFirstFixReceived;
     private Marker mMarker;
     private AddressView mAddressView;
+    private boolean mShowToast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,18 +54,27 @@ public class MapActivity extends SherlockFragmentActivity implements AddressView
         mAddressView.setLocationProvider(this);
         mAddressView.setOnNewAddressListener(this);
         mAddressView.setOnMyLocationClickIgnoredListener(this);
+        
     }
-
+    
     @Override
     protected void onResume() {
         super.onResume();
+        mShowToast = true;
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Utils.shortToast(MapActivity.this, "Click on the map to change the selected location");
+                if (mShowToast) {
+                    Utils.shortToast(MapActivity.this, getString(R.string.click_on_the_map_to_change_the_selected_location));
+                }
             }
-            
         }, 5000);
+    }
+    
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mShowToast  = false;
     }
 
     private boolean ensureMapIsReady() {

@@ -1,11 +1,9 @@
 package com.manuelpeinado.addressfragment.demo;
 
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -15,7 +13,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 
-public class DirectionsActivity extends SherlockFragmentActivity {
+public class DirectionsActivity extends SherlockFragmentActivity implements OnClickListener {
     private GoogleMap mMap;
 
     @Override
@@ -57,12 +55,11 @@ public class DirectionsActivity extends SherlockFragmentActivity {
     }
 
     private void showDirectionsDialog() {
-        new DialogFragment() {
-            @Override
-            public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-                View result = inflater.inflate(R.layout.dialog_directions, container, false);
-                return result;
-            }
-        }.show(getSupportFragmentManager(), "directionsDlg");
+        DirectionsDialog.newInstance().show(getSupportFragmentManager(), "directionsDlg");
+    }
+
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+        
     }
 }

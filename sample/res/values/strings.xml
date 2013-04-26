@@ -8,6 +8,8 @@
     <string name="activity_title_map">Map demo</string>
     <string name="activity_title_list">List demo</string>
     <string name="activity_title_directions">Directions demo</string>
+    <string name="dialog_title_directions">Get directions</string>
     <string name="could_not_load_map">Could not load map</string>
     <string name="action_directions">Directions</string>
+    <string name="click_on_the_map_to_change_the_selected_location">Click on the map to change the selected location</string>
 </resources>
