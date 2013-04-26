@@ -10,7 +10,6 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        map:cameraZoom="16"
-        map:uiCompass="false" />
+        map:cameraZoom="16" />
 
 </FrameLayout>

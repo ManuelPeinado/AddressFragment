@@ -62,6 +62,8 @@ public class BuiltInLocationProvider implements LocationProvider, LocationListen
         }
         LocationManager lm = getLocationManager();
         lm.removeUpdates(this);
+        mListeningToGps = false;
+        mListeningToNetwork = false;
     }
 
     // TODO add the possibility of using the last known location if the client so desires

@@ -199,7 +199,6 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         }
         mIsUsingMyLocation = value;
         if (mIsUsingMyLocation) {
-            mLastLocation = null;
             if (mLocationProvider != null && !mPaused) {
                 resumeLocationProvider();
             }

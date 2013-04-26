@@ -1,7 +1,6 @@
 package com.manuelpeinado.addressfragment.demo;
 
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.widget.Toast;
@@ -10,10 +9,14 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.SupportMapFragment;
 
-public class DirectionsActivity extends SherlockFragmentActivity implements OnClickListener {
+public class DirectionsActivity extends SherlockFragmentActivity implements OnMyLocationChangeListener {
     private GoogleMap mMap;
 
     @Override
@@ -28,7 +31,7 @@ public class DirectionsActivity extends SherlockFragmentActivity implements OnCl
             return;
         }
         mMap.setMyLocationEnabled(true);
-        mMap.getUiSettings().setMyLocationButtonEnabled(false);
+        mMap.setOnMyLocationChangeListener(this);
     }
 
     private boolean ensureMapIsReady() {
@@ -59,7 +62,10 @@ public class DirectionsActivity extends SherlockFragmentActivity implements OnCl
     }
 
     @Override
-    public void onClick(DialogInterface dialog, int which) {
-        
+    public void onMyLocationChange(Location location) {
+        LatLng latLng = Utils.locationToLatLng(location);
+        CameraUpdate update = CameraUpdateFactory.newLatLng(latLng);
+        mMap.animateCamera(update);
+        mMap.setOnMyLocationChangeListener(null);
     }
 }
