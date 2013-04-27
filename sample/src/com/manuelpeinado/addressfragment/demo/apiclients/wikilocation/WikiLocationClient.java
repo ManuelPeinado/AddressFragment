@@ -79,6 +79,8 @@ public class WikiLocationClient {
     }
 
     public void setCallback(Callback<List<Article>> callback) {
-        mTask.setCallback(callback);
+        if (mTask != null) {
+            mTask.setCallback(callback);
+        }
     }
 }
