@@ -1,6 +1,7 @@
 package com.manuelpeinado.addressfragment;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import android.content.Context;
@@ -11,20 +12,20 @@ import android.os.AsyncTask;
 
 public class ReverseGeocodingTask extends AsyncTask<Location, Void, Address> {
 
-    private Context mContext;
-    private Listener mListener;
+    private WeakReference<ReverseGeocodingListener> mListener;
     private Location mLocation;
+    private Geocoder mGeocoder;
     
-    public interface Listener {
+    public interface ReverseGeocodingListener {
         void onReverseGeocodingResultReady(ReverseGeocodingTask sender, Address result);
     }
 
     public ReverseGeocodingTask(Context context) {
-        this.mContext = context;
+        mGeocoder = new Geocoder(context);
     }
 
-    public void setListener(Listener listener) {
-        this.mListener = listener;
+    public void setListener(ReverseGeocodingListener listener) {
+        this.mListener = new WeakReference<ReverseGeocodingListener>(listener);
     }
     
     public Location getLocation() {
@@ -33,11 +34,10 @@ public class ReverseGeocodingTask extends AsyncTask<Location, Void, Address> {
 
     @Override
     protected Address doInBackground(Location... params) {
-        Geocoder geocoder = new Geocoder(mContext);
         List<Address> results;
         try {
             mLocation = params[0];
-            results = geocoder.getFromLocation(mLocation.getLatitude(), mLocation.getLongitude(), 1);
+            results = mGeocoder.getFromLocation(mLocation.getLatitude(), mLocation.getLongitude(), 1);
             if (results.size() > 0) {
                 return results.get(0);
             }
@@ -49,8 +49,8 @@ public class ReverseGeocodingTask extends AsyncTask<Location, Void, Address> {
     
     @Override
     protected void onPostExecute(Address result) {
-        if (mListener != null) {
-            mListener.onReverseGeocodingResultReady(this, result);
+        if (mListener != null && mListener.get() != null) {
+            mListener.get().onReverseGeocodingResultReady(this, result);
         }
     }
 }
