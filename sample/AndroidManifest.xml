@@ -47,6 +47,9 @@
         <activity
             android:name="com.manuelpeinado.addressfragment.demo.DirectionsActivity"
             android:label="@string/activity_title_directions" />
+        <activity
+            android:name="com.manuelpeinado.addressfragment.demo.PopularSearchesActivity"
+            android:label="@string/activity_title_popular_searches" />
         
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"

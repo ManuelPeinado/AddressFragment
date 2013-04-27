@@ -20,6 +20,7 @@ public class GeocodingTask extends AsyncTask<String, Void, List<Address>> {
     private FragmentActivity mActivity;
     private GeocodingTaskListener mListener;
     private String mAddressText;
+    private boolean mShowDisambiguationDialog = true;
 
     public interface GeocodingTaskListener {
         void onGeocodingResultReady(GeocodingTask sender, Address result);
@@ -58,7 +59,7 @@ public class GeocodingTask extends AsyncTask<String, Void, List<Address>> {
         }
         if (results.size() == 0) {
             mListener.onGeocodingResultReady(this, null);
-        } else if (results.size() == 1) {
+        } else if (results.size() == 1 || !mShowDisambiguationDialog) {
             mListener.onGeocodingResultReady(this, results.get(0));
         } else {
             showDisambiguationDialog(results);
@@ -97,5 +98,9 @@ public class GeocodingTask extends AsyncTask<String, Void, List<Address>> {
             result[i] = Utils.prettyPrint(results.get(i));
         }
         return result;
+    }
+
+    public void showDisambiguationDialog(boolean showDisambiguationDialog) {
+        mShowDisambiguationDialog = showDisambiguationDialog;
     }
 }

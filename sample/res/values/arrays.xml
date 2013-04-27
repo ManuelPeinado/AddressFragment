@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="popular_searches">
+        <item>Times Square, New York</item>
+        <item>Rodeo Drive, Los Angeles</item>
+        <item>Champs Elysees, Paris</item>
+        <item>Gran Via, Madrid</item>
+        <item>Oxford Street, London</item>
+        <item>Unter den Linden, Berlin</item>
+        <item>Ginza, Tokyo</item>
+    </string-array>
+
+</resources>

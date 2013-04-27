@@ -291,7 +291,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         if (newState.mIsUsingMyLocation) {
             setUsingMyLocation(true);
         } else {
-            search(newState.mEditTextContent);
+            search(newState.mEditTextContent, false);
         }
     }
 
@@ -386,7 +386,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
             Log.v(TAG, "Editor action IME_ACTION_SEARCH");
             String addressText = getAddressText();
-            search(addressText);
+            search(addressText, true);
             return true;
         }
         return false;
@@ -397,11 +397,15 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
      * "search"
      */
     public void search(String text) {
+        search(text, false);
+    }
+ 
+    private void search(String text, boolean showDisambiguationDialog) {
         mAddressEditText.setText(text);
         clearEditTextFocus();
         mIsUsingMyLocation = false;
         if (!TextUtils.isEmpty(text)) {
-            startGeocoding(text);
+            startGeocoding(text, showDisambiguationDialog);
         }
     }
 
@@ -438,10 +442,11 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         }
     }
 
-    private void startGeocoding(String addressText) {
+    private void startGeocoding(String addressText, boolean showDisambiguationDialog) {
         Log.v(TAG, "Starting geocoding of address " + addressText);
         cancelPendingTasks();
         mGeocodingTask = new GeocodingTask((FragmentActivity) getContext());
+        mGeocodingTask.showDisambiguationDialog(showDisambiguationDialog);
         mGeocodingTask.setListener(this);
         mGeocodingTask.execute(addressText);
         showProgressBar();
