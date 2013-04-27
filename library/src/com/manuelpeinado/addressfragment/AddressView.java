@@ -303,11 +303,13 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         mReverseGeocodingTask = new ReverseGeocodingTask(getContext());
         mReverseGeocodingTask.setListener(this);
         mReverseGeocodingTask.execute(location);
+        showProgressBar();
     }
 
     @Override
     public void onReverseGeocodingResultReady(ReverseGeocodingTask sender, Address result) {
         mReverseGeocodingTask = null;
+        hideProgressBar();
         if (result == null) {
             // TODO use a resource for this string
             Utils.longToast(getContext(), "Location could not be resolved");
