@@ -83,7 +83,9 @@ public class BuiltInLocationProvider implements LocationProvider, LocationListen
             Log.v(TAG, "New location is not significantly better than previous one; ignoring it");
         }
         mLastLocation = newLocation;
-        mAddressFragment.setLocation(newLocation, false);
+        if (mAddressFragment != null) {
+            mAddressFragment.setLocation(newLocation, false);
+        }
     }
 
     @Override

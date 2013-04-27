@@ -175,7 +175,6 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     public void setLocation(Location newLocation, boolean isUserInitiated) {
         if (mWaitingForFirstLocationFix) {
             mWaitingForFirstLocationFix = false;
-            hideProgressBar();
         }
         if (isUserInitiated) {
             // If the provider sends a user-initiated location, we can no longer be in "using 
@@ -369,6 +368,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
         if (hasFocus) {
+            hideProgressBar();
             mUseMyLocationBtn.setImageResource(R.drawable.ic_navigation_cancel);
             pauseLocationProvider();
         } else {
@@ -387,8 +387,8 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
 
     @Override
     public void onGeocodingResultReady(GeocodingTask sender, Address result) {
-        hideProgressBar();
         mGeocodingTask = null;
+        hideProgressBar();
         mLastLocation = Utils.addressToLocation(result);
         String newPrettyAddress = Utils.prettyPrint(result);
         Log.v(TAG,
@@ -432,7 +432,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         }
         mShowingProgressBar = true;
         mProgressBar.setVisibility(View.VISIBLE);
-        mUseMyLocationBtn.setVisibility(View.INVISIBLE);
+        mUseMyLocationBtn.setVisibility(View.GONE);
     }
 
     private void hideProgressBar() {
@@ -440,7 +440,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             return;
         }
         mShowingProgressBar = false;
-        mProgressBar.setVisibility(View.INVISIBLE);
+        mProgressBar.setVisibility(View.GONE);
         mUseMyLocationBtn.setVisibility(View.VISIBLE);
     }
 
@@ -531,7 +531,6 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         if (mWaitingForFirstLocationFix) {
             mWaitingForFirstLocationFix = false;
             showDefaultHint();
-            hideProgressBar();
         }
         mIsLocationProviderPaused = true;
         if (mLocationProvider != null) {

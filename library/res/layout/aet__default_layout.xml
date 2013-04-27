@@ -26,8 +26,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:indeterminate="true"
-            android:visibility="gone"
-            android:padding="@dimen/aet__vertical_margin_small" />
+            android:padding="@dimen/aet__vertical_margin_small"
+            android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/useMyLocationButton"
