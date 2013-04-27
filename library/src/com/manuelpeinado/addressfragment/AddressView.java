@@ -214,6 +214,50 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             }
         }
     }
+    
+    public boolean isUsingMyLocation() {
+        return mIsUsingMyLocation;
+    }
+
+    public void resume() {
+        mPaused  = false;
+        resumeLocationProvider();
+    }
+
+    public void pause() {
+        mPaused = true;
+        pauseLocationProvider();
+    }
+    
+    private static class InnerState {
+        boolean mIsUsingMyLocation;
+        String mEditTextContent;
+    }
+
+    public void swapWith(AddressView other) {
+        InnerState otherState = other.getInnerState();
+        InnerState thisState = getInnerState();
+        setInnerState(otherState);
+        other.setInnerState(thisState);
+    }
+
+    private void setInnerState(InnerState newState) {
+        if (newState.mIsUsingMyLocation) {
+            setUsingMyLocation(true);
+        }
+        else {
+            search(newState.mEditTextContent);
+        }
+    }
+
+    private InnerState getInnerState() {
+        InnerState state = new InnerState();
+        state.mIsUsingMyLocation = mIsUsingMyLocation;
+        if (!mIsUsingMyLocation) {
+            state.mEditTextContent = getAddressText();
+        }
+        return state;
+    }
 
     private void updateTextInMyLocationMode() {
         if (!mIsUsingMyLocation) {
@@ -293,16 +337,24 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
-            clearEditTextFocus();
+            Log.v(TAG, "Editor action IME_ACTION_SEARCH");
             String addressText = getAddressText();
-            if (!TextUtils.isEmpty(addressText)) {
-                Log.v(TAG, "Editor action IME_ACTION_SEARCH");
-                mIsUsingMyLocation = false;
-                startGeocoding(addressText);
-            }
+            search(addressText);
             return true;
         }
         return false;
+    }
+
+    /**
+     * Invoking this method is equivalent to the user entering text and clicking "search"
+     */
+    public void search(String text) {
+        mAddressEditText.setText(text);
+        clearEditTextFocus();
+        mIsUsingMyLocation = false;
+        if (!TextUtils.isEmpty(text)) {
+            startGeocoding(text);
+        }
     }
 
     @Override
@@ -457,20 +509,6 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mAddressEditText.getWindowToken(), 0);
         mAddressEditText.clearFocus();
-    }
-
-    public boolean isUsingMyLocation() {
-        return mIsUsingMyLocation;
-    }
-
-    public void resume() {
-        mPaused  = false;
-        resumeLocationProvider();
-    }
-
-    public void pause() {
-        mPaused = true;
-        pauseLocationProvider();
     }
 
     private void resumeLocationProvider() {
