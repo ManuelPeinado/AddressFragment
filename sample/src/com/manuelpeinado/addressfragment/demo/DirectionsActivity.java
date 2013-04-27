@@ -1,8 +1,14 @@
 package com.manuelpeinado.addressfragment.demo;
 
+import java.util.List;
+
+import android.app.ProgressDialog;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -15,10 +21,15 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.LatLngBounds.Builder;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.manuelpeinado.addressfragment.Callback;
 import com.manuelpeinado.addressfragment.demo.DirectionsDialog.OnAcceptButtonClickListener;
 import com.manuelpeinado.addressfragment.demo.apiclients.directions.GoogleDirectionsClient;
 import com.manuelpeinado.addressfragment.demo.apiclients.directions.GoogleDirectionsResponse;
+import com.manuelpeinado.addressfragment.demo.apiclients.directions.Route;
+import com.manuelpeinado.addressfragment.demo.apiclients.directions.Step;
 
 public class DirectionsActivity extends SherlockFragmentActivity implements OnMyLocationChangeListener,
         OnAcceptButtonClickListener {
@@ -77,18 +88,52 @@ public class DirectionsActivity extends SherlockFragmentActivity implements OnMy
                 sender.getEndAddressView().resolveAddress(new Callback<Location>() {
                     @Override
                     public void onResultReady(final Location endAddress) {
-                        GoogleDirectionsClient client = new GoogleDirectionsClient();
-                        client.sendRequest(startAddress.getLatitude(), startAddress.getLongitude(), 
-                                endAddress.getLatitude(), endAddress.getLongitude(), new Callback<GoogleDirectionsResponse>() {
-                                    @Override
-                                    public void onResultReady(GoogleDirectionsResponse response) {
-                                        Utils.shortToast(DirectionsActivity.this, "Duration of the trip is " + response.getDuration());
-                                    }
-                                });
+                        computeRoute(startAddress, endAddress);
                     }
                 });
             }
         });
+    }
+
+    private void computeRoute(final Location startAddress, final Location endAddress) {
+        GoogleDirectionsClient client = new GoogleDirectionsClient();
+        final ProgressDialog dlg = new ProgressDialog(this);
+        dlg.setCancelable(false);
+        dlg.setMessage(getString(R.string.computing_directions));
+        dlg.setIndeterminate(true);
+        dlg.show();
+        client.sendRequest(startAddress.getLatitude(), startAddress.getLongitude(), 
+                endAddress.getLatitude(), endAddress.getLongitude(), new Callback<GoogleDirectionsResponse>() {
+                    @Override
+                    public void onResultReady(GoogleDirectionsResponse response) {
+                        dlg.hide();
+                        addRoute(response);
+                    }
+                });
+    }
+
+    private void addRoute(GoogleDirectionsResponse response) {
+        if (response.routes == null || response.routes.size() == 0) {
+            return;
+        }
+        Route route = response.routes.get(0);
+        PolylineOptions polylineOptions = new PolylineOptions();
+        for (Step step : route.getAllSteps()) {
+            List<LatLng> points = step.polyline.decodePoints();
+            polylineOptions.addAll(points);
+        }
+        polylineOptions.color(Color.argb(127, 0, 0, 255));
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        float width = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3, displayMetrics);
+        polylineOptions.width(width);
+        Builder builder = LatLngBounds.builder(); 
+        for (LatLng point : polylineOptions.getPoints()) {
+            builder.include(point);
+        }
+        float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, displayMetrics);
+        mMap.addPolyline(polylineOptions);
+        CameraUpdate update = CameraUpdateFactory.newLatLngBounds(builder.build(), (int)padding);
+        mMap.animateCamera(update);
     }
 
     @Override

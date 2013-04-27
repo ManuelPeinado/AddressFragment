@@ -14,4 +14,5 @@
     <string name="click_on_the_map_to_change_the_selected_location">Click on the map to change the selected location</string>
     <string name="querying_wikilocations_api">Querying WikiLocations API</string>
     <string name="swap_addresses">Swap addresses</string>
+    <string name="computing_directions">Computing directions</string>
 </resources>
