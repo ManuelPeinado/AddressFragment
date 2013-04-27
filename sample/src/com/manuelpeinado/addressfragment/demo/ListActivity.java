@@ -27,7 +27,7 @@ public class ListActivity extends SherlockFragmentActivity implements OnNewAddre
 
     private ListView mListView;
     private AddressView mAddressView;
-    private WikiLocationClient client = new WikiLocationClient();
+    private WikiLocationClient mClient = new WikiLocationClient();
     private ArrayAdapter<Article> mAdapter;
     private View mProgress;
 
@@ -45,11 +45,17 @@ public class ListActivity extends SherlockFragmentActivity implements OnNewAddre
         mAddressView.setHandlesOwnLocation(true);
         mAddressView.setOnNewAddressListener(this);
     }
-
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mClient.setCallback(null);
+    }
+    
     @Override
     public void onNewAddress(AddressView sender, Address address, Location location, boolean isUserProvided) {
         showProgress();
-        client.sendRequest(location.getLatitude(), location.getLongitude(), 1000, 10, this);
+        mClient.sendRequest(location.getLatitude(), location.getLongitude(), 1000, 10, this);
     }
 
     @Override

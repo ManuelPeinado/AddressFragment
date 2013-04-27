@@ -11,10 +11,41 @@ import com.google.gson.Gson;
 import com.manuelpeinado.addressfragment.Callback;
 
 public class WikiLocationClient {
+    private static String BASE_URL = "http://api.wikilocation.org/articles?";
+    private static String ENCODING = "UTF-8";
+    private static String ARGS = "lat=%s&lng=%s&radius=%s&limit=%s";
+    private Task mTask;
 
-    private static final String BASE_URL = "http://api.wikilocation.org/articles?";
-    private static final String ENCODING = "UTF-8";
-    private static final String ARGS = "lat=%s&lng=%s&radius=%s&limit=%s";
+    private class Task extends AsyncTask<Void, Void, List<Article>> {
+        double lon;
+        double lat;
+        int limit;
+        int radius;
+        Callback<List<Article>> callback;
+
+        private Task(double lon, double lat, int limit, int radius) {
+            this.lon = lon;
+            this.lat = lat;
+            this.limit = limit;
+            this.radius = radius;
+        }
+
+        @Override
+        protected List<Article> doInBackground(Void... params) {
+            return getArticlesSync(lat, lon, radius, limit);
+        }
+
+        @Override
+        protected void onPostExecute(List<Article> result) {
+            if (callback != null) { 
+                callback.onResultReady(result);
+            }
+        }
+
+        public void setCallback(Callback<List<Article>> callback) {
+            this.callback = callback; 
+        }
+    }
 
     public List<Article> getArticlesSync(double lat, double lon, int radius, int limit) {
         try {
@@ -37,19 +68,17 @@ public class WikiLocationClient {
         return URLEncoder.encode(Double.toString(lat), ENCODING);
     }
 
-    public final void sendRequest(final double lat, final double lon, final int radius, final int limit,
-            final Callback<List<Article>> callback) {
-        new AsyncTask<Void, Void, List<Article>>() {
-            @Override
-            protected List<Article> doInBackground(Void... params) {
-                return getArticlesSync(lat, lon, radius, limit);
-            }
-
-            @Override
-            protected void onPostExecute(List<Article> result) {
-                callback.onResultReady(result);
-            }
-        }.execute();
+    public void sendRequest(double lat, double lon, int radius, int limit,
+            Callback<List<Article>> callback) {
+        if (mTask != null) {
+            mTask.setCallback(null);
+        }
+        mTask = new Task(lon, lat, limit, radius);
+        mTask.setCallback(callback);
+        mTask.execute();
     }
 
+    public void setCallback(Callback<List<Article>> callback) {
+        mTask.setCallback(callback);
+    }
 }
