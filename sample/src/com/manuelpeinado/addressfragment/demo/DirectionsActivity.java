@@ -1,5 +1,6 @@
 package com.manuelpeinado.addressfragment.demo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.ProgressDialog;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.ViewTreeObserver;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -129,19 +131,21 @@ public class DirectionsActivity extends SherlockFragmentActivity implements OnMy
             return;
         }
         Route route = response.routes.get(0);
-        PolylineOptions polylineOptions = new PolylineOptions();
+        ArrayList<LatLng> allPoints = new ArrayList<LatLng>();
         for (Step step : route.getAllSteps()) {
             List<LatLng> points = step.polyline.decodePoints();
-            polylineOptions.addAll(points);
+            allPoints.addAll(points);
         }
-        polylineOptions.color(Color.argb(127, 0, 0, 255));
-        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-        float width = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3, displayMetrics);
-        polylineOptions.width(width);
+        PolylineOptions polylineOptions = createPolyline(allPoints);
+        addPolyline(polylineOptions);
+    }
+
+    private void addPolyline(PolylineOptions polylineOptions) {
         Builder builder = LatLngBounds.builder();
         for (LatLng point : polylineOptions.getPoints()) {
             builder.include(point);
         }
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, displayMetrics);
         if (mPolyline != null) {
             mPolyline.remove();
@@ -151,11 +155,56 @@ public class DirectionsActivity extends SherlockFragmentActivity implements OnMy
         mMap.animateCamera(update);
     }
 
+    private PolylineOptions createPolyline(List<LatLng> points) { 
+        PolylineOptions polylineOptions = new PolylineOptions();
+        polylineOptions.addAll(points);
+        polylineOptions.color(Color.argb(127, 0, 0, 255));
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        float width = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3, displayMetrics);
+        polylineOptions.width(width);
+        return polylineOptions;
+    }
+
     @Override
     public void onMyLocationChange(Location location) {
         LatLng latLng = Utils.locationToLatLng(location);
         CameraUpdate update = CameraUpdateFactory.newLatLng(latLng);
         mMap.animateCamera(update);
         mMap.setOnMyLocationChangeListener(null);
+    }
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        if (mStartAddress != null) {
+            outState.putParcelable("startAddress", mStartAddress);
+        }
+        if (mEndAddress != null) {
+            outState.putParcelable("endAddress", mEndAddress);
+        }
+        if (mPolyline != null) {
+            outState.putParcelableArrayList("polyline", new ArrayList<LatLng>(mPolyline.getPoints()));
+        }
+    }
+    
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        if (savedInstanceState.containsKey("startAddress")) {
+            mStartAddress = savedInstanceState.getParcelable("startAddress");
+        }
+        if (savedInstanceState.containsKey("endAddress")) {
+            mEndAddress = savedInstanceState.getParcelable("endAddress");
+        }
+        if (savedInstanceState.containsKey("polyline")) {
+            List<LatLng> points = savedInstanceState.getParcelableArrayList("polyline");
+            final PolylineOptions polylineOptions = createPolyline(points);
+            // We cannot move the camera until the layout has been complete
+            findViewById(android.R.id.content).getViewTreeObserver().addOnGlobalLayoutListener(
+                    new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            addPolyline(polylineOptions);
+                        }
+            });
+        }
     }
 }
