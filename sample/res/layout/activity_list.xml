@@ -6,15 +6,53 @@
     android:orientation="vertical"
     tools:context=".MapActivity" >
 
-    <fragment
-        android:id="@+id/address"
-        android:name="com.manuelpeinado.addressfragment.AddressFragment"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:background="#1000"
+        android:padding="3dp" >
 
-    <ListView
-        android:id="@+id/list"
+        <fragment
+            android:id="@+id/address"
+            android:name="com.manuelpeinado.addressfragment.AddressFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
+
+    <View 
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="1dp"
+        android:background="#4000"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <ListView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="invisible" />
+
+        <LinearLayout
+            android:id="@+id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:visibility="invisible" >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/querying_wikilocations_api" />
+
+            <ProgressBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true" />
+        </LinearLayout>
+    </FrameLayout>
 
 </LinearLayout>

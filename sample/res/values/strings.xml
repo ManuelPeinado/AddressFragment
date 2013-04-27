@@ -12,4 +12,5 @@
     <string name="could_not_load_map">Could not load map</string>
     <string name="action_directions">Directions</string>
     <string name="click_on_the_map_to_change_the_selected_location">Click on the map to change the selected location</string>
+    <string name="querying_wikilocations_api">Querying WikiLocations API</string>
 </resources>

@@ -29,11 +29,13 @@ public class ListActivity extends SherlockFragmentActivity implements OnNewAddre
     private AddressView mAddressView;
     private WikiLocationClient client = new WikiLocationClient();
     private ArrayAdapter<Article> mAdapter;
+    private View mProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
+        mProgress = findViewById(R.id.progress);
         mListView = (ListView) findViewById(R.id.list);
         mListView.setOnItemClickListener(this);
 
@@ -46,6 +48,7 @@ public class ListActivity extends SherlockFragmentActivity implements OnNewAddre
 
     @Override
     public void onNewAddress(AddressView sender, Address address, Location location, boolean isUserProvided) {
+        showProgress();
         client.sendRequest(location.getLatitude(), location.getLongitude(), 1000, 10, this);
     }
 
@@ -57,6 +60,7 @@ public class ListActivity extends SherlockFragmentActivity implements OnNewAddre
         int layout = android.R.layout.simple_list_item_1;
         mAdapter = new ArrayAdapter<Article>(this, layout, android.R.id.text1, result);
         mListView.setAdapter(mAdapter);
+        showList();
     }
 
     @Override
@@ -65,5 +69,15 @@ public class ListActivity extends SherlockFragmentActivity implements OnNewAddre
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(article.mobileUrl));
         startActivity(i);
+    }
+    
+    private void showList() {
+        mListView.setVisibility(View.VISIBLE);
+        mProgress.setVisibility(View.INVISIBLE);
+    }
+    
+    private void showProgress() {
+        mListView.setVisibility(View.INVISIBLE);
+        mProgress.setVisibility(View.VISIBLE);
     }
 }
