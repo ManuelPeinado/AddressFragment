@@ -23,11 +23,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.manuelpeinado.addressfragment.GeocodingTask.GeocodingTaskListener;
+
 /**
  *
  */
 public class AddressView extends LinearLayout implements IAddressProvider, OnClickListener,
-        ReverseGeocodingTask.Listener, OnEditorActionListener, GeocodingTask.Listener, OnItemClickListener,
+        ReverseGeocodingTask.Listener, OnEditorActionListener, GeocodingTaskListener, OnItemClickListener,
         OnFocusChangeListener {
 
     protected static final String TAG = AddressView.class.getSimpleName();
