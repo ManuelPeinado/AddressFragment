@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.manuelpeinado.addressfragment.AddressView;
+import com.manuelpeinado.addressfragment.AddressView.State;
 
 public class DirectionsDialog extends DialogFragment implements android.view.View.OnClickListener {
 
@@ -23,10 +24,19 @@ public class DirectionsDialog extends DialogFragment implements android.view.Vie
         void onAcceptButtonClick(DirectionsDialog sender);
     }
 
-    public static DirectionsDialog newInstance() {
-        return new DirectionsDialog();
+    public static DirectionsDialog newInstance(State startAddress, State endAddress) {
+        DirectionsDialog dlg = new DirectionsDialog();
+        Bundle args = new Bundle();
+        if (startAddress != null) { 
+            args.putParcelable("startAddress", startAddress);
+        }
+        if (endAddress != null) {
+            args.putParcelable("endAddress", endAddress);
+        }
+        dlg.setArguments(args);
+        return dlg;
     }
-    
+
     public void setOnAcceptButtonClickListener(OnAcceptButtonClickListener listener) {
         mListener = listener;
     }
@@ -34,7 +44,7 @@ public class DirectionsDialog extends DialogFragment implements android.view.Vie
     public AddressView getStartAddressView() {
         return mStartAddressView;
     }
-    
+
     public AddressView getEndAddressView() {
         return mEndAddressView;
     }
@@ -58,7 +68,15 @@ public class DirectionsDialog extends DialogFragment implements android.view.Vie
 
         mStartAddressView = (AddressView) view.findViewById(R.id.start);
         mEndAddressView = (AddressView) view.findViewById(R.id.end);
-        mEndAddressView.setUsingMyLocation(false);
+        Bundle args = getArguments();
+        if (args.containsKey("startAddress")) {
+            mStartAddressView.setState((AddressView.State) args.getParcelable("startAddress"));
+        } else {
+            mEndAddressView.setUsingMyLocation(false);
+        }
+        if (args.containsKey("endAddress")) {
+            mEndAddressView.setState((AddressView.State) args.getParcelable("endAddress"));
+        }
         mSwapButton = view.findViewById(R.id.swap);
         mSwapButton.setOnClickListener(this);
 

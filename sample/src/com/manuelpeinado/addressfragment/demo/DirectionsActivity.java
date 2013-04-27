@@ -23,7 +23,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.LatLngBounds.Builder;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.manuelpeinado.addressfragment.AddressView;
 import com.manuelpeinado.addressfragment.Callback;
 import com.manuelpeinado.addressfragment.demo.DirectionsDialog.OnAcceptButtonClickListener;
 import com.manuelpeinado.addressfragment.demo.apiclients.directions.GoogleDirectionsClient;
@@ -34,6 +36,10 @@ import com.manuelpeinado.addressfragment.demo.apiclients.directions.Step;
 public class DirectionsActivity extends SherlockFragmentActivity implements OnMyLocationChangeListener,
         OnAcceptButtonClickListener {
     private GoogleMap mMap;
+    private Polyline mPolyline;
+    private DirectionsDialog mDirectionsDialog;
+    private AddressView.State mStartAddress;
+    private AddressView.State mEndAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,25 +80,31 @@ public class DirectionsActivity extends SherlockFragmentActivity implements OnMy
     }
 
     private void showDirectionsDialog() {
-        DirectionsDialog dlg = DirectionsDialog.newInstance();
+        mDirectionsDialog = DirectionsDialog.newInstance(mStartAddress, mEndAddress);
         // TODO restore this listener when activity is recreated due to configuration change
-        dlg.setOnAcceptButtonClickListener(this);
-        dlg.show(getSupportFragmentManager(), "directionsDlg");
+        mDirectionsDialog.setOnAcceptButtonClickListener(this);
+        mDirectionsDialog.show(getSupportFragmentManager(), "directionsDlg");
     }
-    
+
     @Override
     public void onAcceptButtonClick(final DirectionsDialog sender) {
         sender.getStartAddressView().resolveAddress(new Callback<Location>() {
             @Override
             public void onResultReady(final Location startAddress) {
+                mStartAddress = mDirectionsDialog.getStartAddressView().getState();
                 sender.getEndAddressView().resolveAddress(new Callback<Location>() {
                     @Override
                     public void onResultReady(final Location endAddress) {
+                        mEndAddress = mDirectionsDialog.getEndAddressView().getState();
                         computeRoute(startAddress, endAddress);
                     }
                 });
             }
         });
+    }
+
+    protected String getAddress(AddressView addressView) {
+        return null;
     }
 
     private void computeRoute(final Location startAddress, final Location endAddress) {
@@ -102,8 +114,8 @@ public class DirectionsActivity extends SherlockFragmentActivity implements OnMy
         dlg.setMessage(getString(R.string.computing_directions));
         dlg.setIndeterminate(true);
         dlg.show();
-        client.sendRequest(startAddress.getLatitude(), startAddress.getLongitude(), 
-                endAddress.getLatitude(), endAddress.getLongitude(), new Callback<GoogleDirectionsResponse>() {
+        client.sendRequest(startAddress.getLatitude(), startAddress.getLongitude(), endAddress.getLatitude(),
+                endAddress.getLongitude(), new Callback<GoogleDirectionsResponse>() {
                     @Override
                     public void onResultReady(GoogleDirectionsResponse response) {
                         dlg.hide();
@@ -126,13 +138,16 @@ public class DirectionsActivity extends SherlockFragmentActivity implements OnMy
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         float width = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3, displayMetrics);
         polylineOptions.width(width);
-        Builder builder = LatLngBounds.builder(); 
+        Builder builder = LatLngBounds.builder();
         for (LatLng point : polylineOptions.getPoints()) {
             builder.include(point);
         }
         float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, displayMetrics);
-        mMap.addPolyline(polylineOptions);
-        CameraUpdate update = CameraUpdateFactory.newLatLngBounds(builder.build(), (int)padding);
+        if (mPolyline != null) {
+            mPolyline.remove();
+        }
+        mPolyline = mMap.addPolyline(polylineOptions);
+        CameraUpdate update = CameraUpdateFactory.newLatLngBounds(builder.build(), (int) padding);
         mMap.animateCamera(update);
     }
 

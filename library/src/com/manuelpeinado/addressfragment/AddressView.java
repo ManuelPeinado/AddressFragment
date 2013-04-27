@@ -3,6 +3,8 @@ package com.manuelpeinado.addressfragment;
 import android.content.Context;
 import android.location.Address;
 import android.location.Location;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -30,8 +32,8 @@ import com.manuelpeinado.addressfragment.SingleShotLocationTask.SingleShotLocati
  *
  */
 public class AddressView extends LinearLayout implements IAddressProvider, OnClickListener,
-        ReverseGeocodingTask.ReverseGeocodingListener, OnEditorActionListener, GeocodingTaskListener, OnItemClickListener,
-        OnFocusChangeListener {
+        ReverseGeocodingTask.ReverseGeocodingListener, OnEditorActionListener, GeocodingTaskListener,
+        OnItemClickListener, OnFocusChangeListener {
 
     protected static final String TAG = AddressView.class.getSimpleName();
     /**
@@ -205,24 +207,22 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
                 resumeLocationProvider();
             }
             updateTextInMyLocationMode();
-        }
-        else {
+        } else {
             if (mLocationProvider == null) {
                 mAddressEditText.setText("");
                 showDefaultHint();
-            }
-            else {
+            } else {
                 pauseLocationProvider();
             }
         }
     }
-    
+
     public boolean isUsingMyLocation() {
         return mIsUsingMyLocation;
     }
 
     public void resume() {
-        mPaused  = false;
+        mPaused = false;
         resumeLocationProvider();
     }
 
@@ -230,30 +230,73 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         mPaused = true;
         pauseLocationProvider();
     }
-    
-    private static class InnerState {
+
+    /**
+     * This class allows us to save the state of an address view as a parcelable instance
+     * It is for example possible to save the instance state of an address view like this:
+     *     Bundle out = new Bundle();
+     *     out.putParcelable("address", addressView.getState());
+     * And then to restore the state:
+     *     // Bundle in
+     *     addressView.setState(in); 
+     */
+    public static class State implements Parcelable {
         boolean mIsUsingMyLocation;
         String mEditTextContent;
+
+        public State() {
+        }
+
+        private State(Parcel in) {
+            readFromParcel(in);
+        }
+
+        private void readFromParcel(Parcel in) {
+            mIsUsingMyLocation = in.readInt() == 1;
+            mEditTextContent = in.readString();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeInt(mIsUsingMyLocation ? 1 : 0);
+            out.writeString(mEditTextContent);
+        }
+
+        public static final Parcelable.Creator<State> CREATOR = new Parcelable.Creator<State>() {
+            @Override
+            public State createFromParcel(Parcel in) {
+                return new State(in);
+            }
+
+            @Override
+            public State[] newArray(int size) {
+                return new State[size];
+            }
+        };
     }
 
     public void swapWith(AddressView other) {
-        InnerState otherState = other.getInnerState();
-        InnerState thisState = getInnerState();
-        setInnerState(otherState);
-        other.setInnerState(thisState);
+        State otherState = other.getState();
+        State thisState = getState();
+        setState(otherState);
+        other.setState(thisState);
     }
 
-    private void setInnerState(InnerState newState) {
+    public void setState(State newState) {
         if (newState.mIsUsingMyLocation) {
             setUsingMyLocation(true);
-        }
-        else {
+        } else {
             search(newState.mEditTextContent);
         }
     }
 
-    private InnerState getInnerState() {
-        InnerState state = new InnerState();
+    public State getState() {
+        State state = new State();
         state.mIsUsingMyLocation = mIsUsingMyLocation;
         if (!mIsUsingMyLocation) {
             state.mEditTextContent = getAddressText();
@@ -350,7 +393,8 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     /**
-     * Invoking this method is equivalent to the user entering text and clicking "search"
+     * Invoking this method is equivalent to the user entering text and clicking
+     * "search"
      */
     public void search(String text) {
         mAddressEditText.setText(text);
@@ -360,7 +404,8 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             startGeocoding(text);
         }
     }
-    
+
+    // TODO comment this
     public void resolveAddress(final Callback<Location> callback) {
         if (!mIsUsingMyLocation || mLocationProvider != null) {
             callback.onResultReady(mLastLocation);
