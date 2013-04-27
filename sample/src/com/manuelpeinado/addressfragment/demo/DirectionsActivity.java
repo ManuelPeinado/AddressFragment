@@ -13,10 +13,15 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.manuelpeinado.addressfragment.Callback;
+import com.manuelpeinado.addressfragment.demo.DirectionsDialog.OnAcceptButtonClickListener;
+import com.manuelpeinado.addressfragment.demo.apiclients.directions.GoogleDirectionsClient;
+import com.manuelpeinado.addressfragment.demo.apiclients.directions.GoogleDirectionsResponse;
 
-public class DirectionsActivity extends SherlockFragmentActivity implements OnMyLocationChangeListener {
+public class DirectionsActivity extends SherlockFragmentActivity implements OnMyLocationChangeListener,
+        OnAcceptButtonClickListener {
     private GoogleMap mMap;
 
     @Override
@@ -42,7 +47,7 @@ public class DirectionsActivity extends SherlockFragmentActivity implements OnMy
         }
         return true;
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(this).inflate(R.menu.activity_directions, menu);
@@ -58,7 +63,32 @@ public class DirectionsActivity extends SherlockFragmentActivity implements OnMy
     }
 
     private void showDirectionsDialog() {
-        DirectionsDialog.newInstance().show(getSupportFragmentManager(), "directionsDlg");
+        DirectionsDialog dlg = DirectionsDialog.newInstance();
+        // TODO restore this listener when activity is recreated due to configuration change
+        dlg.setOnAcceptButtonClickListener(this);
+        dlg.show(getSupportFragmentManager(), "directionsDlg");
+    }
+    
+    @Override
+    public void onAcceptButtonClick(final DirectionsDialog sender) {
+        sender.getStartAddressView().resolveAddress(new Callback<Location>() {
+            @Override
+            public void onResultReady(final Location startAddress) {
+                sender.getEndAddressView().resolveAddress(new Callback<Location>() {
+                    @Override
+                    public void onResultReady(final Location endAddress) {
+                        GoogleDirectionsClient client = new GoogleDirectionsClient();
+                        client.sendRequest(startAddress.getLatitude(), startAddress.getLongitude(), 
+                                endAddress.getLatitude(), endAddress.getLongitude(), new Callback<GoogleDirectionsResponse>() {
+                                    @Override
+                                    public void onResultReady(GoogleDirectionsResponse response) {
+                                        Utils.shortToast(DirectionsActivity.this, "Duration of the trip is " + response.getDuration());
+                                    }
+                                });
+                    }
+                });
+            }
+        });
     }
 
     @Override

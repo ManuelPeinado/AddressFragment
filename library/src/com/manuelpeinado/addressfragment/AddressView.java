@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.manuelpeinado.addressfragment.GeocodingTask.GeocodingTaskListener;
+import com.manuelpeinado.addressfragment.SingleShotLocationTask.SingleShotLocationListener;
 
 /**
  *
@@ -358,6 +359,22 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         if (!TextUtils.isEmpty(text)) {
             startGeocoding(text);
         }
+    }
+    
+    public void resolveAddress(final Callback<Location> callback) {
+        if (!mIsUsingMyLocation || mLocationProvider != null) {
+            callback.onResultReady(mLastLocation);
+            return;
+        }
+        // This means that the text field is showing "My location", which is unknown. So we must 
+        // resolve it using a single shot location request
+        SingleShotLocationTask request = new SingleShotLocationTask(getContext());
+        request.getLocation(new SingleShotLocationListener() {
+            @Override
+            public void onLocationReady(SingleShotLocationTask sender, Location location) {
+                callback.onResultReady(location);
+            }
+        });
     }
 
     @Override

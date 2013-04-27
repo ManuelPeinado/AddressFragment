@@ -20,7 +20,7 @@ public class DirectionsDialog extends DialogFragment implements android.view.Vie
     private OnAcceptButtonClickListener mListener;
 
     public interface OnAcceptButtonClickListener {
-        void onAcceptButtonClick();
+        void onAcceptButtonClick(DirectionsDialog sender);
     }
 
     public static DirectionsDialog newInstance() {
@@ -31,6 +31,14 @@ public class DirectionsDialog extends DialogFragment implements android.view.Vie
         mListener = listener;
     }
 
+    public AddressView getStartAddressView() {
+        return mStartAddressView;
+    }
+    
+    public AddressView getEndAddressView() {
+        return mEndAddressView;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -38,9 +46,9 @@ public class DirectionsDialog extends DialogFragment implements android.view.Vie
         builder.setPositiveButton(android.R.string.ok, new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // TODO check that both addresses has been introduced
+                // TODO check that both addresses have been introduced
                 if (mListener != null) {
-                    mListener.onAcceptButtonClick();
+                    mListener.onAcceptButtonClick(DirectionsDialog.this);
                 }
             }
         });
@@ -65,5 +73,4 @@ public class DirectionsDialog extends DialogFragment implements android.view.Vie
     private void swapAddresses() {
         mStartAddressView.swapWith(mEndAddressView);
     }
-
 }
