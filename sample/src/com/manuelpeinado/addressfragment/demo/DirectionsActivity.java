@@ -175,6 +175,7 @@ public class DirectionsActivity extends SherlockFragmentActivity implements OnMy
     
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         if (mStartAddress != null) {
             outState.putParcelable("startAddress", mStartAddress);
         }
