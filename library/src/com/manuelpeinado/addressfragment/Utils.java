@@ -41,12 +41,14 @@ public class Utils {
     }
 
     // Write javadoc explaining differences to isBetterLocation
-    public static boolean isDifferentLocation(Location oldLocation, Location newLocation) {
-        if (newLocation == null) {
-            return false;
+    public static boolean isDifferentLocation(Location a, Location b) {
+        if ((a == null || b == null) && a != b) {
+            return true;
         }
-        // TODO implement this
-        return true;
+        final double EPSILON = 1e-4; // Roughly 10m
+        double latDiff = a.getLatitude() - b.getLatitude();
+        double lonDiff = a.getLongitude() - b.getLongitude();
+        return latDiff * latDiff + lonDiff * lonDiff > EPSILON * EPSILON;
     }
 
     public static Location addressToLocation(Address address) {
