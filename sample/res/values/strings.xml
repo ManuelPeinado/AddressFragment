@@ -16,4 +16,5 @@
     <string name="querying_wikilocations_api">Querying WikiLocations API</string>
     <string name="swap_addresses">Swap addresses</string>
     <string name="computing_directions">Computing directions</string>
+    <string name="select_a_search_text">Select a search text</string>
 </resources>

@@ -29,6 +29,7 @@ public class PopularSearchesActivity extends SherlockFragmentActivity implements
         mAddressView.setUsingMyLocation(false);
         mAddressView.setReadOnly(true);
         mAddressView.setShowMyLocationButton(false);
+        mAddressView.setHint(R.string.select_a_search_text);
     }
 
     @Override

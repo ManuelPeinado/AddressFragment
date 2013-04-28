@@ -420,6 +420,14 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         mShowMyLocationButton = value;
         updateButtonVisibility();
     }
+    
+    /**
+     * Changes the text that is shown when the input field is empty. By default
+     * the hint is "Enter address here" 
+     */
+    public void setHint(int resId) {
+        mAddressEditText.setHint(resId);
+    }
  
     private void updateButtonVisibility() {
         boolean shouldShowMyLocationBtn = mShowMyLocationButton && !mShowingProgressBar;
