@@ -8,22 +8,23 @@
     <AutoCompleteTextView
         android:id="@+id/addressEditText"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/aet__action_button_size"
         android:layout_gravity="left|bottom"
         android:layout_weight="1"
         android:completionThreshold="2"
         android:hint="@string/aet__address_edit_text_hint"
         android:imeOptions="actionSearch"
         android:inputType="textNoSuggestions"
+        android:maxLines="1"
         android:selectAllOnFocus="true" />
 
     <FrameLayout
-        android:layout_width="@dimen/aet__action_button_size"
-        android:layout_height="@dimen/aet__action_button_size" >
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" >
 
         <ProgressBar
             android:id="@+id/progressBar"
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/aet__action_button_size"
             android:layout_height="match_parent"
             android:indeterminate="true"
             android:padding="@dimen/aet__vertical_margin_small"
@@ -31,7 +32,7 @@
 
         <ImageButton
             android:id="@+id/useMyLocationButton"
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/aet__action_button_size"
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:contentDescription="@string/aet__use_current_location"

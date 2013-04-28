@@ -82,6 +82,8 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private boolean mWaitingForFirstLocationFix;
     private boolean mShowingProgressBar;
     private boolean mPaused = true;
+    private boolean mReadOnly;
+    private boolean mShowMyLocationButton = true;
 
     /**
      * An objects that implements this interface can provide location fixes to
@@ -399,7 +401,32 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     public void search(String text) {
         search(text, false);
     }
+    
+    /**
+     * Prevent the user from editing the address, but the address is still modifiable programmatically
+     */
+    public void setReadOnly(boolean value) {
+        if (mReadOnly == value) {
+            return;
+        }
+        mReadOnly = value;
+        Utils.setEditTextReadOnly(mAddressEditText, mReadOnly);
+    }
+    
+    public void setShowMyLocationButton(boolean value) {
+        if (mShowMyLocationButton == value) {
+            return;
+        }
+        mShowMyLocationButton = value;
+        updateButtonVisibility();
+    }
  
+    private void updateButtonVisibility() {
+        boolean shouldShowMyLocationBtn = mShowMyLocationButton && !mShowingProgressBar;
+        mUseMyLocationBtn.setVisibility(shouldShowMyLocationBtn ? View.VISIBLE : View.GONE);
+        mProgressBar.setVisibility(mShowingProgressBar ? View.VISIBLE : View.GONE);
+    }
+
     private void search(String text, boolean showDisambiguationDialog) {
         mAddressEditText.setText(text);
         clearEditTextFocus();
@@ -498,8 +525,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             return;
         }
         mShowingProgressBar = true;
-        mProgressBar.setVisibility(View.VISIBLE);
-        mUseMyLocationBtn.setVisibility(View.GONE);
+        updateButtonVisibility();
     }
 
     private void hideProgressBar() {
@@ -507,8 +533,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             return;
         }
         mShowingProgressBar = false;
-        mProgressBar.setVisibility(View.GONE);
-        mUseMyLocationBtn.setVisibility(View.VISIBLE);
+        updateButtonVisibility();
     }
 
     @Override

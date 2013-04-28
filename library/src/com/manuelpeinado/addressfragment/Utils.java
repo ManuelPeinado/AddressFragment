@@ -1,14 +1,18 @@
 package com.manuelpeinado.addressfragment;
 
 import java.util.Locale;
+import java.util.Random;
 
 import android.content.Context;
 import android.location.Address;
 import android.location.Location;
+import android.text.method.KeyListener;
+import android.widget.EditText;
 import android.widget.Toast;
 
 public class Utils {
     private static final String LOCATION_FMT_STR = "%.4f, %.4f";
+    private static final int RANDOM_TAG_KEY = new Random().nextInt();
 
     public static void sleep(long time) {
         try {
@@ -128,4 +132,14 @@ public class Utils {
         return result;
     }
 
+    public static void setEditTextReadOnly(EditText editText, boolean readOnly) {
+        if (readOnly) {
+            editText.setTag(RANDOM_TAG_KEY, editText.getKeyListener());
+            editText.setKeyListener(null);
+        }
+        else {
+            Object tag = editText.getTag(RANDOM_TAG_KEY);
+            editText.setKeyListener((KeyListener)tag);
+        }
+    }
 }
