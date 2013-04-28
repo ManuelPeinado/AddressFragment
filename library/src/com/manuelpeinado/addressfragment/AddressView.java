@@ -338,15 +338,18 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
      * @param isUserInitiated
      */
     private void onNewLocation(Location newLocation, boolean isUserInitiated) {
-        // We use the hasFocus test to find out when the user has started interaction with the edit text, 
-        // at which point we must stop listening to location updates because we don't want to annoy the
-        // user by changing the contents of the edittext when she is in the middle of writing an address
-        if (!mAddressEditText.hasFocus()) {
+        // We use the hasFocus test to prevent annoying the user by changing the 
+        // contents of the edittext when she is in the middle of writing an address
+        if (!mAddressEditText.hasFocus() || isUserInitiated) {
             if (Utils.isDifferentLocation(mLastLocation, newLocation)) {
                 startReverseGeocodingTask(newLocation, isUserInitiated);
             } else {
                 Log.v(TAG, "New location is too similar to previous one; ignoring it");
             }
+        }
+        // This seems to improve usability
+        if (mAddressEditText.hasFocus() && isUserInitiated) {
+            clearEditTextFocus();
         }
     }
 
