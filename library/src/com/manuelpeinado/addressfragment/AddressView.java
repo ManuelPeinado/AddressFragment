@@ -200,7 +200,11 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     public void setUsingMyLocation(boolean value) {
-        if (mIsUsingMyLocation == value) {
+        setUsingMyLocation(value, false);
+    }
+
+    private void setUsingMyLocation(boolean value, boolean force) {
+        if (!force && mIsUsingMyLocation == value) {
             return;
         }
         mIsUsingMyLocation = value;
@@ -234,13 +238,11 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     /**
-     * This class allows us to save the state of an address view as a parcelable instance
-     * It is for example possible to save the instance state of an address view like this:
-     *     Bundle out = new Bundle();
-     *     out.putParcelable("address", addressView.getState());
-     * And then to restore the state:
-     *     // Bundle in
-     *     addressView.setState(in); 
+     * This class allows us to save the state of an address view as a parcelable
+     * instance It is for example possible to save the instance state of an
+     * address view like this: Bundle out = new Bundle();
+     * out.putParcelable("address", addressView.getState()); And then to restore
+     * the state: // Bundle in addressView.setState(in);
      */
     public static class State implements Parcelable {
         boolean mIsUsingMyLocation;
@@ -291,7 +293,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
 
     public void setState(State newState) {
         if (newState.mIsUsingMyLocation) {
-            setUsingMyLocation(true);
+            setUsingMyLocation(true, true);
         } else {
             search(newState.mEditTextContent, false);
         }
@@ -401,9 +403,10 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     public void search(String text) {
         search(text, false);
     }
-    
+
     /**
-     * Prevent the user from editing the address, but the address is still modifiable programmatically
+     * Prevent the user from editing the address, but the address is still
+     * modifiable programmatically
      */
     public void setReadOnly(boolean value) {
         if (mReadOnly == value) {
@@ -412,7 +415,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         mReadOnly = value;
         Utils.setEditTextReadOnly(mAddressEditText, mReadOnly);
     }
-    
+
     public void setShowMyLocationButton(boolean value) {
         if (mShowMyLocationButton == value) {
             return;
@@ -420,15 +423,15 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         mShowMyLocationButton = value;
         updateButtonVisibility();
     }
-    
+
     /**
      * Changes the text that is shown when the input field is empty. By default
-     * the hint is "Enter address here" 
+     * the hint is "Enter address here"
      */
     public void setHint(int resId) {
         mAddressEditText.setHint(resId);
     }
- 
+
     private void updateButtonVisibility() {
         boolean shouldShowMyLocationBtn = mShowMyLocationButton && !mShowingProgressBar;
         mUseMyLocationBtn.setVisibility(shouldShowMyLocationBtn ? View.VISIBLE : View.GONE);
@@ -637,5 +640,56 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             Log.v(TAG, "Pausing location provider");
             mLocationProvider.setAddressView(null);
         }
+    }
+
+    static class SavedState extends BaseSavedState {
+        State stateToSave;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        private SavedState(Parcel in) {
+            super(in);
+            this.stateToSave = in.readParcelable(State.class.getClassLoader());
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeParcelable(this.stateToSave, flags);
+        }
+
+        //required field that makes Parcelables from a Parcel
+        public static final Parcelable.Creator<SavedState> CREATOR = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
+    @Override
+    public Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        SavedState ss = new SavedState(superState);
+        ss.stateToSave = getState();
+        return ss;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        //begin boilerplate code so parent classes can restore state
+        if (!(state instanceof SavedState)) {
+            super.onRestoreInstanceState(state);
+            return;
+        }
+
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+        setState(ss.stateToSave);
     }
 }
