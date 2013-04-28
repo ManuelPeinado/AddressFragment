@@ -132,6 +132,10 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         LayoutInflater.from(context).inflate(R.layout.aet__default_layout, this);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         mAddressEditText = (AutoCompleteTextView) findViewById(R.id.addressEditText);
+        // This is important or else we get bitten by this:
+        // http://stackoverflow.com/questions/15024892/two-searchviews-in-one-activity-and-screen-rotation
+        mAddressEditText.setSaveEnabled(false);
+        mAddressEditText.setTag(getTag());
         mAddressEditText.setAdapter(new AutocompleteAddressAdapter(context));
         // We use this listener to find out when the user has clicked "Done" on the virtual keyboard
         mAddressEditText.setOnEditorActionListener(this);
@@ -165,12 +169,16 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         }
         if (mIsUsingMyLocation) {
             // If we were showing "My location" now we need to show the hint "Waiting for location"
-            mAddressEditText.setText("");
+            setText("");
         }
         if (!mIsLocationProviderPaused) {
             resumeLocationProvider();
         }
         Log.v(TAG, "Setting new location provider");
+    }
+
+    private void setText(String text) {
+        mAddressEditText.setText(text);
     }
 
     /**
@@ -215,7 +223,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             updateTextInMyLocationMode();
         } else {
             if (mLocationProvider == null) {
-                mAddressEditText.setText("");
+                setText("");
                 showDefaultHint();
             } else {
                 pauseLocationProvider();
@@ -313,7 +321,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             return;
         }
         if (mLocationProvider == null) {
-            mAddressEditText.setText(R.string.aet__my_location);
+            setText(getResources().getString(R.string.aet__my_location));
         } else if (mWaitingForFirstLocationFix) {
             showWaitingForLocationHint();
         }
@@ -322,7 +330,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private void updateText() {
         AutocompleteAddressAdapter adapter = (AutocompleteAddressAdapter) mAddressEditText.getAdapter();
         mAddressEditText.setAdapter(null);
-        mAddressEditText.setText(mPrettyAddress);
+        setText(mPrettyAddress);
         mAddressEditText.setAdapter(adapter);
     }
 
@@ -439,7 +447,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     private void search(String text, boolean showDisambiguationDialog) {
-        mAddressEditText.setText(text);
+        setText(text);
         clearEditTextFocus();
         mIsUsingMyLocation = false;
         if (!TextUtils.isEmpty(text)) {
@@ -576,7 +584,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         } else {
             // If we were not on "my location" mode when the edit began, we restore the address
             // that was in the edittext when the edit began
-            mAddressEditText.setText(mPrettyAddress);
+            setText(mPrettyAddress);
             onEditorAction(mAddressEditText, EditorInfo.IME_ACTION_DONE, null);
         }
     }
@@ -642,11 +650,12 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         }
     }
 
-    static class SavedState extends BaseSavedState {
-        State stateToSave;
+    private static class SavedState extends BaseSavedState {
+        private State stateToSave;
 
-        SavedState(Parcelable superState) {
+        public SavedState(Parcelable superState, State state) {
             super(superState);
+            stateToSave = state;
         }
 
         private SavedState(Parcel in) {
@@ -661,6 +670,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         }
 
         //required field that makes Parcelables from a Parcel
+        @SuppressWarnings("unused")
         public static final Parcelable.Creator<SavedState> CREATOR = new Parcelable.Creator<SavedState>() {
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);
@@ -674,20 +684,18 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
 
     @Override
     public Parcelable onSaveInstanceState() {
+        Log.v(TAG, "Saving instance state " + getTag());
         Parcelable superState = super.onSaveInstanceState();
-        SavedState ss = new SavedState(superState);
-        ss.stateToSave = getState();
-        return ss;
+        return new SavedState(superState, getState());
     }
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-        //begin boilerplate code so parent classes can restore state
+        Log.v(TAG, "Restoring instance state " + getTag());
         if (!(state instanceof SavedState)) {
             super.onRestoreInstanceState(state);
             return;
         }
-
         SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
         setState(ss.stateToSave);

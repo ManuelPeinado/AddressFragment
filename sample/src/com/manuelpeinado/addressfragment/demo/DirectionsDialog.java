@@ -27,7 +27,7 @@ public class DirectionsDialog extends DialogFragment implements android.view.Vie
     public static DirectionsDialog newInstance(State startAddress, State endAddress) {
         DirectionsDialog dlg = new DirectionsDialog();
         Bundle args = new Bundle();
-        if (startAddress != null) { 
+        if (startAddress != null) {
             args.putParcelable("startAddress", startAddress);
         }
         if (endAddress != null) {
@@ -71,11 +71,11 @@ public class DirectionsDialog extends DialogFragment implements android.view.Vie
         Bundle args = getArguments();
         if (args.containsKey("startAddress")) {
             mStartAddressView.setState((AddressView.State) args.getParcelable("startAddress"));
-        } else {
-            mEndAddressView.setUsingMyLocation(false);
         }
         if (args.containsKey("endAddress")) {
             mEndAddressView.setState((AddressView.State) args.getParcelable("endAddress"));
+        } else if (savedInstanceState == null) {
+            mEndAddressView.setUsingMyLocation(false);
         }
         mSwapButton = view.findViewById(R.id.swap);
         mSwapButton.setOnClickListener(this);
