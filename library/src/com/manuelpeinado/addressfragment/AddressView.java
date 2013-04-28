@@ -78,7 +78,6 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
      */
     private ImageView mUseMyLocationBtn;
     private ProgressBar mProgressBar;
-    private boolean mIsLocationProviderPaused = true;
     private boolean mWaitingForFirstLocationFix;
     private boolean mShowingProgressBar;
     private boolean mPaused = true;
@@ -170,9 +169,9 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         if (mIsUsingMyLocation) {
             // If we were showing "My location" now we need to show the hint "Waiting for location"
             setText("");
-        }
-        if (!mIsLocationProviderPaused) {
-            resumeLocationProvider();
+            if (!mPaused) {
+                resumeLocationProvider();
+            }
         }
         Log.v(TAG, "Setting new location provider");
     }
@@ -194,7 +193,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             // my location", as any new fixes would overwrite the location set by the user
             mIsUsingMyLocation = false;
             pauseLocationProvider();
-        } else if (mIsLocationProviderPaused) {
+        } else if (!mIsUsingMyLocation || mPaused) {
             // We shouldn't receive non user-initiated locations from the provider, but in case
             // we receive one anyway we have to ignore it
             return;
@@ -627,7 +626,6 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     private void resumeLocationProvider() {
-        mIsLocationProviderPaused = false;
         if (mIsUsingMyLocation && mLocationProvider != null) {
             Log.v(TAG, "Resuming location provider");
             mLocationProvider.setAddressView(this);
@@ -636,14 +634,10 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     private void pauseLocationProvider() {
-        if (mIsLocationProviderPaused) {
-            return;
-        }
         if (mWaitingForFirstLocationFix) {
             mWaitingForFirstLocationFix = false;
             showDefaultHint();
         }
-        mIsLocationProviderPaused = true;
         if (mLocationProvider != null) {
             Log.v(TAG, "Pausing location provider");
             mLocationProvider.setAddressView(null);

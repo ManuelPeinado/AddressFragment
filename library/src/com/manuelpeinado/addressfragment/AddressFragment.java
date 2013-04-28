@@ -21,7 +21,7 @@ public class AddressFragment extends Fragment {
         }
         return mAddressView;
     }
-    
+
     public AddressView getAddressView() {
         return mAddressView;
     }
@@ -31,13 +31,13 @@ public class AddressFragment extends Fragment {
         super.onResume();
         mAddressView.resume();
     }
-    
+
     @Override
     public void onPause() {
         super.onPause();
         mAddressView.pause();
     }
-    
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
