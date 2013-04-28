@@ -42,6 +42,9 @@
             android:name="com.manuelpeinado.addressfragment.demo.MapActivity"
             android:label="@string/activity_title_map" />
         <activity
+            android:name="com.manuelpeinado.addressfragment.demo.VirtualWalkActivity"
+            android:label="@string/activity_title_virtual_walk" />
+        <activity
             android:name="com.manuelpeinado.addressfragment.demo.ListActivity"
             android:label="@string/activity_title_list" />
         <activity

@@ -24,7 +24,6 @@ public class MapActivity extends SherlockFragmentActivity implements AddressView
         AddressView.OnNewAddressListener, OnMyLocationChangeListener,
         AddressView.OnMyLocationClickIgnoredListener, OnMapClickListener {
 
-    private static boolean USE_MOCK_LOCATION_SOURCE = false;
     private GoogleMap mMap;
     private boolean mFirstFixReceived;
     private Marker mMarker;
@@ -45,9 +44,6 @@ public class MapActivity extends SherlockFragmentActivity implements AddressView
         mMap.setMyLocationEnabled(true);
         mMap.setOnMyLocationChangeListener(this);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
-        if (USE_MOCK_LOCATION_SOURCE) {
-            mMap.setLocationSource(new MockLocationSource());
-        }
         mMap.setOnMapClickListener(this);
         AddressFragment addressFragment = (AddressFragment) fm.findFragmentById(R.id.address);
         mAddressView = addressFragment.getAddressView();
@@ -55,6 +51,9 @@ public class MapActivity extends SherlockFragmentActivity implements AddressView
         mAddressView.setOnNewAddressListener(this);
         mAddressView.setOnMyLocationClickIgnoredListener(this);
         
+        if (getUseMockLocationSource()) {
+            mMap.setLocationSource(new MockLocationSource());
+        }
     }
     
     @Override
@@ -136,5 +135,9 @@ public class MapActivity extends SherlockFragmentActivity implements AddressView
     @Override
     public void onMapClick(LatLng point) {
         mAddressView.setLocation(Utils.latLngToLocation(point), true);
+    }
+    
+    protected boolean getUseMockLocationSource() {
+        return false;
     }
 }

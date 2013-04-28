@@ -9,6 +9,7 @@
     <string name="activity_title_list">List demo</string>
     <string name="activity_title_directions">Directions demo</string>
     <string name="activity_title_popular_searches">Popular searches</string>
+    <string name="activity_title_virtual_walk">Virtual walk</string>
     <string name="dialog_title_directions">Get directions</string>
     <string name="could_not_load_map">Could not load map</string>
     <string name="action_directions">Directions</string>

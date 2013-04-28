@@ -9,10 +9,10 @@ public class MockLocationSource implements LocationSource {
 
     private OnLocationChangedListener mListener;
     private long mInitTime;
-    private static final Location START_LOCATION = Utils.newLocation(40.41718, -3.70307);
-    private static final Location END_LOCATION = Utils.newLocation(40.41999, -3.70151);
-    private static final int TOTAL_TIME = 20 * 1; // In seconds
-    private static final int PERIOD = 1000; // 1 second
+    private static final Location START_LOCATION = Utils.newLocation(40.7308, -73.9974); // Washington Square Park
+    private static final Location END_LOCATION = Utils.newLocation(40.8052, -73.9431); // Marcus Garvey Park
+    private static final int TOTAL_TIME = 10 * 60; // In seconds (that's 10 km in 10 minutes, almost 60 km/h)
+    private static final int PERIOD = 1000; // In ms
 
     @Override
     public void activate(OnLocationChangedListener listener) {

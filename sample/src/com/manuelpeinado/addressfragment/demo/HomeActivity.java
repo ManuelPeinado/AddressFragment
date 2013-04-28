@@ -30,6 +30,7 @@ import com.actionbarsherlock.app.SherlockListActivity;
 public class HomeActivity extends SherlockListActivity {
     private List<ActivityInfo> activitiesInfo = Arrays.asList(
             new ActivityInfo(MapActivity.class, R.string.activity_title_map),
+            new ActivityInfo(VirtualWalkActivity.class, R.string.activity_title_virtual_walk),
             new ActivityInfo(ListActivity.class, R.string.activity_title_list),
             new ActivityInfo(DirectionsActivity.class, R.string.activity_title_directions),
             new ActivityInfo(PopularSearchesActivity.class, R.string.activity_title_popular_searches));
