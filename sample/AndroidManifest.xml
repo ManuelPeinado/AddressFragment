@@ -45,6 +45,9 @@
             android:name="com.manuelpeinado.addressfragment.demo.VirtualWalkActivity"
             android:label="@string/activity_title_virtual_walk" />
         <activity
+            android:name="com.manuelpeinado.addressfragment.demo.SingleShotVirtualWalkActivity"
+            android:label="@string/activity_title_virtual_walk_single_shot" />
+        <activity
             android:name="com.manuelpeinado.addressfragment.demo.ListActivity"
             android:label="@string/activity_title_list" />
         <activity
@@ -53,7 +56,7 @@
         <activity
             android:name="com.manuelpeinado.addressfragment.demo.PopularSearchesActivity"
             android:label="@string/activity_title_popular_searches" />
-        
+
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyABVqp6vmlIepyCNWquY3Pi2sZ1KbUiaJ8" />

@@ -48,6 +48,7 @@ public class MapActivity extends SherlockFragmentActivity implements AddressView
         AddressFragment addressFragment = (AddressFragment) fm.findFragmentById(R.id.address);
         mAddressView = addressFragment.getAddressView();
         mAddressView.setLocationProvider(this);
+        mAddressView.setSingleShot(getIsSingleShot());
         mAddressView.setOnNewAddressListener(this);
         mAddressView.setOnMyLocationClickIgnoredListener(this);
         
@@ -138,6 +139,10 @@ public class MapActivity extends SherlockFragmentActivity implements AddressView
     }
     
     protected boolean getUseMockLocationSource() {
+        return false;
+    }
+
+    protected boolean getIsSingleShot() {
         return false;
     }
 }

@@ -45,13 +45,13 @@ public class ListActivity extends SherlockFragmentActivity implements OnNewAddre
         mAddressView.setHandlesOwnLocation(true);
         mAddressView.setOnNewAddressListener(this);
     }
-    
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mClient.setCallback(null);
     }
-    
+
     @Override
     public void onNewAddress(AddressView sender, Address address, Location location, boolean isUserProvided) {
         showProgress();
@@ -76,12 +76,12 @@ public class ListActivity extends SherlockFragmentActivity implements OnNewAddre
         i.setData(Uri.parse(article.mobileUrl));
         startActivity(i);
     }
-    
+
     private void showList() {
         mListView.setVisibility(View.VISIBLE);
         mProgress.setVisibility(View.INVISIBLE);
     }
-    
+
     private void showProgress() {
         mListView.setVisibility(View.INVISIBLE);
         mProgress.setVisibility(View.VISIBLE);

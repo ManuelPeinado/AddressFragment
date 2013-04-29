@@ -80,9 +80,11 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private ProgressBar mProgressBar;
     private boolean mWaitingForFirstLocationFix;
     private boolean mShowingProgressBar;
-    private boolean mPaused = true;
+    private boolean mPaused;
     private boolean mReadOnly;
     private boolean mShowMyLocationButton = true;
+    private boolean mIsSingleShot;
+    private boolean mLocationProviderDisabled;
 
     /**
      * An objects that implements this interface can provide location fixes to
@@ -193,11 +195,16 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             // my location", as any new fixes would overwrite the location set by the user
             mIsUsingMyLocation = false;
             pauseLocationProvider();
-        } else if (!mIsUsingMyLocation || mPaused) {
+        } else if (!mIsUsingMyLocation || mPaused || mLocationProviderDisabled) {
             // We shouldn't receive non user-initiated locations from the provider, but in case
             // we receive one anyway we have to ignore it
             return;
         }
+
+        if (mIsUsingMyLocation && mLocationProvider != null && mIsSingleShot) {
+            disableLocationProvider();
+        }
+
         onNewLocation(newLocation, isUserInitiated);
     }
 
@@ -232,6 +239,45 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
 
     public boolean isUsingMyLocation() {
         return mIsUsingMyLocation;
+    }
+
+    public void setSingleShot(boolean value) {
+        if (mIsSingleShot == value) {
+            return;
+        }
+        mIsSingleShot = value;
+        if (!mIsUsingMyLocation || mLocationProvider == null) {
+            // If single shot mode is activated but we are not using my location
+            // or we don't have a location provider then there's nothing to do
+            return;
+        }
+        if (mIsSingleShot) {
+            if (mLastLocation != null) {
+                // If single shot mode is activated and we already had a location,
+                // we don't need more so we disable the location provider
+                disableLocationProvider();
+            }
+        } else {
+            // If single shot mode is deactivated while in my location mode, we 
+            // need to resume location updates
+            enableLocationProvider();
+        }
+    }
+
+    private void enableLocationProvider() {
+        if (!mLocationProviderDisabled) {
+            return;
+        }
+        mLocationProviderDisabled = false;
+        resumeLocationProvider();
+    }
+
+    private void disableLocationProvider() {
+        if (mLocationProviderDisabled) {
+            return;
+        }
+        mLocationProviderDisabled = true;
+        pauseLocationProvider();
     }
 
     public void resume() {
@@ -569,8 +615,15 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         } else {
             // This means that the button has the semantics "use my location"
             if (mIsUsingMyLocation) {
-                if (mOnMyLocationClickIgnoredListener != null) {
-                    mOnMyLocationClickIgnoredListener.onMyLocationClickIgnored(this);
+                if (mIsSingleShot && mLocationProviderDisabled) {
+                    // If the provider is disabled due to us being on single shot mode, the 
+                    // user clicking on the my location button is interpreted as a request to
+                    // obtain a new location fix
+                    enableLocationProvider();
+                } else {
+                    if (mOnMyLocationClickIgnoredListener != null) {
+                        mOnMyLocationClickIgnoredListener.onMyLocationClickIgnored(this);
+                    }
                 }
             } else {
                 setUsingMyLocation(true);
