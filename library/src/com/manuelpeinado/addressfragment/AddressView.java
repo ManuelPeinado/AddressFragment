@@ -85,6 +85,12 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private boolean mShowMyLocationButton = true;
     private boolean mIsSingleShot;
     private boolean mLocationProviderDisabled;
+    /** If true, instead of using the real location of the device we use a simulated
+     * location that goes moves from Washington Square to Marcus Garvey Park, in NYC. 
+     * This is useful during developent, to see what happens if the location changes 
+     * fast without having to leave home  
+     */
+    private static final boolean USE_MOCK_BUILT_IN_LOCATION_PROVIDER = false; 
 
     /**
      * An objects that implements this interface can provide location fixes to
@@ -210,9 +216,14 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
 
     public void setHandlesOwnLocation(boolean value) {
         Log.v(TAG, "Handling own location: " + value);
-        setLocationProvider(new BuiltInLocationProvider());
+        setLocationProvider(createBuiltInLocationProvider());
     }
 
+    private LocationProvider createBuiltInLocationProvider() {
+        return USE_MOCK_BUILT_IN_LOCATION_PROVIDER ?
+                new MockBuiltInLocationProvider() : new BuiltInLocationProvider();
+    }
+    
     public void setUsingMyLocation(boolean value) {
         setUsingMyLocation(value, false);
     }
