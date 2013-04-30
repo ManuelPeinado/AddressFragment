@@ -19,6 +19,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -82,15 +83,24 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private boolean mShowingProgressBar;
     private boolean mPaused;
     private boolean mReadOnly;
+    /**
+     * If false, the my location button is now shown. This is useful in
+     * applications where for some reason the device location is not available,
+     * and so manual input is the only choice.
+     */
     private boolean mShowMyLocationButton = true;
     private boolean mIsSingleShot;
     private boolean mLocationProviderDisabled;
-    /** If true, instead of using the real location of the device we use a simulated
-     * location that goes moves from Washington Square to Marcus Garvey Park, in NYC. 
-     * This is useful during developent, to see what happens if the location changes 
-     * fast without having to leave home  
+    private boolean mHideButtonAutomatically = true;
+    private FrameLayout mButtonsParent;
+    private boolean mHasFocus;
+    /**
+     * If true, instead of using the real location of the device we use a
+     * simulated location that goes moves from Washington Square to Marcus
+     * Garvey Park, in NYC. This is useful during developent, to see what
+     * happens if the location changes fast without having to leave home
      */
-    private static final boolean USE_MOCK_BUILT_IN_LOCATION_PROVIDER = false; 
+    private static final boolean USE_MOCK_BUILT_IN_LOCATION_PROVIDER = false;
 
     /**
      * An objects that implements this interface can provide location fixes to
@@ -135,8 +145,11 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         setFocusable(true);
         setFocusableInTouchMode(true);
         setOrientation(LinearLayout.HORIZONTAL);
+        // TODO call this using reflection
+        // setLayoutTransition(new LayoutTransition());
 
         LayoutInflater.from(context).inflate(R.layout.aet__default_layout, this);
+        mButtonsParent = (FrameLayout) findViewById(R.id.buttonsParent);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         mAddressEditText = (AutoCompleteTextView) findViewById(R.id.addressEditText);
         // This is important or else we get bitten by this:
@@ -200,6 +213,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             // If the provider sends a user-initiated location, we can no longer be in "using 
             // my location", as any new fixes would overwrite the location set by the user
             mIsUsingMyLocation = false;
+            updateButtonVisibility();
             pauseLocationProvider();
         } else if (!mIsUsingMyLocation || mPaused || mLocationProviderDisabled) {
             // We shouldn't receive non user-initiated locations from the provider, but in case
@@ -220,10 +234,9 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     private LocationProvider createBuiltInLocationProvider() {
-        return USE_MOCK_BUILT_IN_LOCATION_PROVIDER ?
-                new MockBuiltInLocationProvider() : new BuiltInLocationProvider();
+        return USE_MOCK_BUILT_IN_LOCATION_PROVIDER ? new MockBuiltInLocationProvider() : new BuiltInLocationProvider();
     }
-    
+
     public void setUsingMyLocation(boolean value) {
         setUsingMyLocation(value, false);
     }
@@ -233,6 +246,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             return;
         }
         mIsUsingMyLocation = value;
+        updateButtonVisibility();
         if (mIsUsingMyLocation) {
             if (mLocationProvider != null && !mPaused) {
                 resumeLocationProvider();
@@ -500,9 +514,20 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     private void updateButtonVisibility() {
+        if (mHideButtonAutomatically) {
+            boolean shouldHideAll = !mHasFocus && (mIsUsingMyLocation || !mShowMyLocationButton);
+            if (mShowingProgressBar) {
+                shouldHideAll = false;
+            }
+            if (shouldHideAll) {
+                mButtonsParent.setVisibility(View.GONE);
+                return;
+            }
+        }
+        mButtonsParent.setVisibility(View.VISIBLE);
         boolean shouldShowMyLocationBtn = mShowMyLocationButton && !mShowingProgressBar;
-        mUseMyLocationBtn.setVisibility(shouldShowMyLocationBtn ? View.VISIBLE : View.GONE);
-        mProgressBar.setVisibility(mShowingProgressBar ? View.VISIBLE : View.GONE);
+        mUseMyLocationBtn.setVisibility(shouldShowMyLocationBtn ? View.VISIBLE : View.INVISIBLE);
+        mProgressBar.setVisibility(mShowingProgressBar ? View.VISIBLE : View.INVISIBLE);
     }
 
     private void search(String text, boolean showDisambiguationDialog) {
@@ -538,6 +563,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
 
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
+        mHasFocus = hasFocus;
         if (hasFocus) {
             hideProgressBar();
             mUseMyLocationBtn.setImageResource(R.drawable.ic_navigation_cancel);
@@ -545,6 +571,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         } else {
             mUseMyLocationBtn.setImageResource(R.drawable.ic_device_access_location_found);
         }
+        updateButtonVisibility();
     }
 
     private void startGeocoding(String addressText, boolean showDisambiguationDialog) {

@@ -19,6 +19,7 @@
         android:selectAllOnFocus="true" />
 
     <FrameLayout
+        android:id="@+id/buttonsParent"
         android:layout_width="wrap_content"
         android:layout_height="match_parent" >
 
@@ -28,7 +29,7 @@
             android:layout_height="match_parent"
             android:indeterminate="true"
             android:padding="@dimen/aet__vertical_margin_small"
-            android:visibility="gone" />
+            android:visibility="invisible" />
 
         <ImageButton
             android:id="@+id/useMyLocationButton"
