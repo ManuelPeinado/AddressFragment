@@ -56,6 +56,10 @@
         <activity
             android:name="com.manuelpeinado.addressfragment.demo.PopularSearchesActivity"
             android:label="@string/activity_title_popular_searches" />
+        <activity
+            android:name="com.manuelpeinado.addressfragment.demo.ActionBarActivity"
+            android:label="@string/activity_title_action_bar"
+            android:theme="@style/AppTheme.Light" />
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"

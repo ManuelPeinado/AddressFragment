@@ -1,4 +1,4 @@
-package com.manuelpeinado.addressfragment;
+ package com.manuelpeinado.addressfragment;
 
 import android.content.Context;
 import android.location.Location;
@@ -78,9 +78,9 @@ public class BuiltInLocationProvider implements LocationProvider, LocationListen
 
     @Override
     public void onLocationChanged(Location newLocation) {
-        Log.v(TAG, "Received location " + Utils.prettyPrint(newLocation) + " from " + newLocation.getProvider());
+        Utils.logv(TAG, "onLocationChanged", "%s (%s)", Utils.prettyPrint(newLocation), newLocation.getProvider());
         if (!Utils.isBetterLocation(newLocation, mLastLocation)) {
-            Log.v(TAG, "New location is not significantly better than previous one; ignoring it");
+            Utils.logv(TAG, "onLocationChanged", "New location is not significantly better than previous one; ignoring it");
         }
         mLastLocation = newLocation;
         if (mAddressFragment != null) {

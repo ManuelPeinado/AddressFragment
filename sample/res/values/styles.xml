@@ -2,4 +2,6 @@
 
     <style name="AppTheme" parent="Theme.Sherlock.Light.DarkActionBar"></style>
 
+    <style name="AppTheme.Light" parent="Theme.Sherlock.Light"></style>
+
 </resources>

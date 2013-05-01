@@ -34,7 +34,8 @@ public class HomeActivity extends SherlockListActivity {
             new ActivityInfo(SingleShotVirtualWalkActivity.class, R.string.activity_title_virtual_walk_single_shot),
             new ActivityInfo(ListActivity.class, R.string.activity_title_list),
             new ActivityInfo(DirectionsActivity.class, R.string.activity_title_directions),
-            new ActivityInfo(PopularSearchesActivity.class, R.string.activity_title_popular_searches));
+            new ActivityInfo(PopularSearchesActivity.class, R.string.activity_title_popular_searches),
+            new ActivityInfo(ActionBarActivity.class, R.string.activity_title_action_bar));
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,7 +82,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private ProgressBar mProgressBar;
     private boolean mWaitingForFirstLocationFix;
     private boolean mShowingProgressBar;
-    private boolean mPaused;
+    private boolean mPaused = true;
     private boolean mReadOnly;
     /**
      * If false, the my location button is now shown. This is useful in
@@ -145,6 +146,8 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         setFocusable(true);
         setFocusableInTouchMode(true);
         setOrientation(LinearLayout.HORIZONTAL);
+        setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        
         // TODO call this using reflection
         // setLayoutTransition(new LayoutTransition());
 
@@ -209,18 +212,20 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         if (mWaitingForFirstLocationFix) {
             mWaitingForFirstLocationFix = false;
         }
+
         if (isUserInitiated) {
             // If the provider sends a user-initiated location, we can no longer be in "using 
             // my location", as any new fixes would overwrite the location set by the user
             mIsUsingMyLocation = false;
             updateButtonVisibility();
             pauseLocationProvider();
-        } else if (!mIsUsingMyLocation || mPaused || mLocationProviderDisabled) {
+        } else if (!mIsUsingMyLocation || mLocationProviderDisabled) {
             // We shouldn't receive non user-initiated locations from the provider, but in case
             // we receive one anyway we have to ignore it
             return;
         }
 
+        Utils.logv(TAG, "setLocation", Utils.prettyPrint(newLocation));
         if (mIsUsingMyLocation && mLocationProvider != null && mIsSingleShot) {
             disableLocationProvider();
         }
@@ -305,11 +310,19 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         pauseLocationProvider();
     }
 
+    /**
+     * It is mandatory to call this method from your Activity's onResume method 
+     * unless you don't use the "handlesOwnLocation" mode
+     */
     public void resume() {
         mPaused = false;
         resumeLocationProvider();
     }
 
+    /**
+     * It is mandatory to call this method from your Activity's onResume method 
+     * unless you don't use the "handlesOwnLocation" mode
+     */
     public void pause() {
         mPaused = true;
         pauseLocationProvider();
@@ -516,7 +529,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private void updateButtonVisibility() {
         if (mHideButtonAutomatically) {
             boolean shouldHideAll = !mHasFocus && (mIsUsingMyLocation || !mShowMyLocationButton);
-            if (mShowingProgressBar) {
+            if (mShowingProgressBar || mIsSingleShot) {
                 shouldHideAll = false;
             }
             if (shouldHideAll) {

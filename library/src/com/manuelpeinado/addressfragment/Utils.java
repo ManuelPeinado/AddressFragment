@@ -7,6 +7,7 @@ import android.content.Context;
 import android.location.Address;
 import android.location.Location;
 import android.text.method.KeyListener;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -59,6 +60,7 @@ public class Utils {
     }
 
     private static final int TWO_MINUTES = 1000 * 60 * 2;
+    private static boolean DEBUG = false;
 
     /**
      * Determines whether one Location reading is better than the current
@@ -142,6 +144,12 @@ public class Utils {
         else {
             Object tag = editText.getTag(RANDOM_TAG_KEY);
             editText.setKeyListener((KeyListener)tag);
+        }
+    }
+    
+    public static void logv(String className, String methodName, String fmt, Object...args) {
+        if (DEBUG) {
+            Log.v(className + "#" + methodName + "()", String.format(fmt, args));
         }
     }
 }
