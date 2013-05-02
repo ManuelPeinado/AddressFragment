@@ -5,28 +5,27 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" >
 
-    <AutoCompleteTextView
-        android:id="@+id/addressEditText"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/aet__action_button_size"
-        android:layout_gravity="left|bottom"
-        android:layout_weight="1"
-        android:completionThreshold="2"
-        android:hint="@string/aet__address_edit_text_hint"
-        android:imeOptions="actionSearch"
-        android:inputType="textNoSuggestions"
-        android:maxLines="1"
-        android:selectAllOnFocus="true" />
-
     <FrameLayout
-        android:id="@+id/buttonsParent"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent" >
+
+        <AutoCompleteTextView
+            android:id="@+id/addressEditText"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/aet__action_button_size"
+            android:layout_gravity="left|bottom"
+            android:completionThreshold="2"
+            android:hint="@string/aet__address_edit_text_hint"
+            android:imeOptions="actionSearch"
+            android:inputType="textNoSuggestions"
+            android:maxLines="1"
+            android:selectAllOnFocus="true" />
 
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="@dimen/aet__action_button_size"
-            android:layout_height="match_parent"
+            android:layout_height="@dimen/aet__action_button_size"
+            android:layout_gravity="right"
             android:indeterminate="true"
             android:padding="@dimen/aet__vertical_margin_small"
             android:visibility="invisible" />
@@ -34,8 +33,8 @@
         <ImageButton
             android:id="@+id/useMyLocationButton"
             android:layout_width="@dimen/aet__action_button_size"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
+            android:layout_height="@dimen/aet__action_button_size"
+            android:layout_gravity="right"
             android:contentDescription="@string/aet__use_current_location"
             android:padding="@dimen/aet__vertical_margin_small"
             android:scaleType="fitCenter"

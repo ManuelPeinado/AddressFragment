@@ -8,6 +8,7 @@ import android.location.Address;
 import android.location.Location;
 import android.text.method.KeyListener;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -151,5 +152,14 @@ public class Utils {
         if (DEBUG) {
             Log.v(className + "#" + methodName + "()", String.format(fmt, args));
         }
+    }
+
+    public static int[] getPadding(View view) {
+        return new int[] {
+                view.getPaddingLeft(),
+                view.getPaddingTop(),
+                view.getPaddingRight(),
+                view.getPaddingBottom()
+        };
     }
 }

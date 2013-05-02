@@ -19,7 +19,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -92,8 +91,9 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private boolean mIsSingleShot;
     private boolean mLocationProviderDisabled;
     private boolean mHideButtonAutomatically = true;
-    private FrameLayout mButtonsParent;
     private boolean mHasFocus;
+    private int[] mAddressEditTextPadding;
+    private float mButtonSize;
     /**
      * If true, instead of using the real location of the device we use a
      * simulated location that goes moves from Washington Square to Marcus
@@ -146,14 +146,16 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         setFocusableInTouchMode(true);
         setOrientation(LinearLayout.HORIZONTAL);
         setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-        
+
         // TODO call this using reflection
         // setLayoutTransition(new LayoutTransition());
 
         LayoutInflater.from(context).inflate(R.layout.aet__default_layout, this);
-        mButtonsParent = (FrameLayout) findViewById(R.id.buttonsParent);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         mAddressEditText = (AutoCompleteTextView) findViewById(R.id.addressEditText);
+        mAddressEditTextPadding = Utils.getPadding(mAddressEditText);
+        mButtonSize = getResources().getDimension(R.dimen.aet__action_button_size);
+
         // This is important or else we get bitten by this:
         // http://stackoverflow.com/questions/15024892/two-searchviews-in-one-activity-and-screen-rotation
         mAddressEditText.setSaveEnabled(false);
@@ -310,7 +312,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     /**
-     * It is mandatory to call this method from your Activity's onResume method 
+     * It is mandatory to call this method from your Activity's onResume method
      * unless you don't use the "handlesOwnLocation" mode
      */
     public void resume() {
@@ -319,7 +321,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     /**
-     * It is mandatory to call this method from your Activity's onResume method 
+     * It is mandatory to call this method from your Activity's onResume method
      * unless you don't use the "handlesOwnLocation" mode
      */
     public void pause() {
@@ -526,17 +528,24 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     private void updateButtonVisibility() {
+        boolean shouldHideButton;
         if (mHideButtonAutomatically) {
-            boolean shouldHideAll = !mHasFocus && (mIsUsingMyLocation || !mShowMyLocationButton);
-            if (mShowingProgressBar || mIsSingleShot) {
-                shouldHideAll = false;
+            if (mHasFocus) {
+                shouldHideButton = false;
+            } else if (mIsUsingMyLocation) {
+                shouldHideButton = !mShowingProgressBar && !mIsSingleShot;
+            } else {
+                shouldHideButton = !mShowingProgressBar && !mShowMyLocationButton;
             }
-            if (shouldHideAll) {
-                mButtonsParent.setVisibility(View.GONE);
+            int additionalRightPadding = (int) (shouldHideButton ? 0 : mButtonSize);
+            mAddressEditText.setPadding(mAddressEditTextPadding[0], mAddressEditTextPadding[1],
+                    mAddressEditTextPadding[2] + additionalRightPadding, mAddressEditTextPadding[3]);
+            if (shouldHideButton) {
+                mUseMyLocationBtn.setVisibility(View.INVISIBLE);
+                mProgressBar.setVisibility(View.INVISIBLE);
                 return;
             }
         }
-        mButtonsParent.setVisibility(View.VISIBLE);
         boolean shouldShowMyLocationBtn = mShowMyLocationButton && !mShowingProgressBar;
         mUseMyLocationBtn.setVisibility(shouldShowMyLocationBtn ? View.VISIBLE : View.INVISIBLE);
         mProgressBar.setVisibility(mShowingProgressBar ? View.VISIBLE : View.INVISIBLE);
