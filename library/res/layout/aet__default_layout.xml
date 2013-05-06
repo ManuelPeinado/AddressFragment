@@ -1,7 +1,3 @@
-<!--
- The next focusable and focusableInTouchMode attributes are important
-     to prevent the edit text to have focus initially
--->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" >
 
@@ -9,29 +5,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
-        <AutoCompleteTextView
-            android:id="@+id/addressEditText"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/aet__action_button_size"
-            android:layout_gravity="left|bottom"
-            android:completionThreshold="2"
-            android:hint="@string/aet__address_edit_text_hint"
-            android:imeOptions="actionSearch"
-            android:inputType="textNoSuggestions"
-            android:maxLines="1"
-            android:selectAllOnFocus="true" />
+        <AutoCompleteTextView style="@style/AddressViewWidget.EditText" />
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="@style/ProgressBar"
-            android:visibility="invisible" />
+        <ProgressBar style="@style/AddressViewWidget.ProgressBar" />
 
-        <ImageButton
-            android:id="@+id/useMyLocationButton"
-            style="@style/Button"
-            android:contentDescription="@string/aet__use_current_location"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_device_access_location_found" />
+        <ImageButton style="@style/AddressViewWidget.Button" />
     </FrameLayout>
 
 </merge>
