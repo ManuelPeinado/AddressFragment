@@ -9,6 +9,7 @@ import android.location.Location;
 import android.text.method.KeyListener;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -141,25 +142,29 @@ public class Utils {
         if (readOnly) {
             editText.setTag(RANDOM_TAG_KEY, editText.getKeyListener());
             editText.setKeyListener(null);
-        }
-        else {
+        } else {
             Object tag = editText.getTag(RANDOM_TAG_KEY);
-            editText.setKeyListener((KeyListener)tag);
+            editText.setKeyListener((KeyListener) tag);
         }
     }
-    
-    public static void logv(String className, String methodName, String fmt, Object...args) {
+
+    public static void logv(String className, String methodName, String fmt, Object... args) {
         if (DEBUG) {
             Log.v(className + "#" + methodName + "()", String.format(fmt, args));
         }
     }
 
     public static int[] getPadding(View view) {
-        return new int[] {
-                view.getPaddingLeft(),
-                view.getPaddingTop(),
-                view.getPaddingRight(),
-                view.getPaddingBottom()
-        };
+        return new int[] { view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), view.getPaddingBottom() };
+    }
+
+    public static void forceShowVirtualKeyboard(Context context) {
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+    }
+
+    public static void hideVirtualKeyboard(Context context, View view) {
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 }

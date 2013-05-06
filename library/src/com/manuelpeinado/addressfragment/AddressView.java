@@ -586,6 +586,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     public void onFocusChange(View v, boolean hasFocus) {
         mHasFocus = hasFocus;
         if (hasFocus) {
+            Utils.forceShowVirtualKeyboard(getContext());
             hideProgressBar();
             mUseMyLocationBtn.setImageResource(R.drawable.ic_navigation_cancel);
             pauseLocationProvider();
@@ -735,8 +736,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     private void clearEditTextFocus() {
-        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mAddressEditText.getWindowToken(), 0);
+        Utils.hideVirtualKeyboard(getContext(), mAddressEditText);
         mAddressEditText.clearFocus();
     }
 
