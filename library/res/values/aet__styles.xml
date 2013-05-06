@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="ButtonBase">
+        <item name="android:layout_width">@dimen/aet__action_button_size</item>
+        <item name="android:layout_height">@dimen/aet__action_button_size</item>
+        <item name="android:layout_gravity">right</item>
+        <item name="android:padding">@dimen/aet__vertical_margin_small</item>
+        <item name="android:indeterminate">true</item>
+    </style>
+
+    <style name="ProgressBar" parent="@style/ButtonBase" />
+
+    <style name="Button" parent="@style/ButtonBase">
+        <item name="android:background">@android:drawable/list_selector_background</item>
+    </style>
+
+</resources>

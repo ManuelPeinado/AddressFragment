@@ -23,20 +23,13 @@
 
         <ProgressBar
             android:id="@+id/progressBar"
-            android:layout_width="@dimen/aet__action_button_size"
-            android:layout_height="@dimen/aet__action_button_size"
-            android:layout_gravity="right"
-            android:indeterminate="true"
-            android:padding="@dimen/aet__vertical_margin_small"
+            style="@style/ProgressBar"
             android:visibility="invisible" />
 
         <ImageButton
             android:id="@+id/useMyLocationButton"
-            android:layout_width="@dimen/aet__action_button_size"
-            android:layout_height="@dimen/aet__action_button_size"
-            android:layout_gravity="right"
+            style="@style/Button"
             android:contentDescription="@string/aet__use_current_location"
-            android:padding="@dimen/aet__vertical_margin_small"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_device_access_location_found" />
     </FrameLayout>
