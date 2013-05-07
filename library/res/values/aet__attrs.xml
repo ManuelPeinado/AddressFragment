@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <declare-styleable name="AddressView">
+        <attr name="readOnly" format="boolean"/>
+    </declare-styleable>
+    
+    <declare-styleable name="AddressViewLib">
+        <attr name="addressViewStyle" format="reference" />
+    </declare-styleable>
+</resources>

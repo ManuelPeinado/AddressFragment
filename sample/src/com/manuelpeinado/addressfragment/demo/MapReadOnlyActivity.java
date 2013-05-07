@@ -41,7 +41,6 @@ public class MapReadOnlyActivity extends SherlockFragmentActivity implements Add
         AddressFragment addressFragment = (AddressFragment) fm.findFragmentById(R.id.address);
         mAddressView = addressFragment.getAddressView();
         mAddressView.setLocationProvider(this);
-        mAddressView.setReadOnly(true);
         if (USE_MOCK_LOCATION_SOURCE) {
             mMap.setLocationSource(new MockLocationSource());
         }

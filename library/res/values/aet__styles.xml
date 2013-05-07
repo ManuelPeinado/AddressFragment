@@ -13,7 +13,7 @@
 
     <style name="AddressViewWidget.ProgressBar" parent="@style/Internal__AddressViewWidget__Button">
         <item name="android:id">@id/progressBar</item>
-        <item name="android:visibility">invisible</item> 
+        <item name="android:visibility">invisible</item>
     </style>
 
     <style name="AddressViewWidget.ButtonBase" parent="@style/Internal__AddressViewWidget__Button">
@@ -23,11 +23,11 @@
         <item name="android:scaleType">fitCenter</item>
         <item name="android:src">@drawable/ic_device_access_location_found</item>
     </style>
-    
+
     <style name="AddressViewWidget.Button" parent="@style/AddressViewWidget.ButtonBase">
         <item name="android:background">@android:drawable/list_selector_background</item>
     </style>
-    
+
     <style name="AddressViewWidget.EditText">
         <item name="android:id">@id/addressEditText</item>
         <item name="android:layout_width">match_parent</item>
@@ -39,6 +39,10 @@
         <item name="android:inputType">textNoSuggestions</item>
         <item name="android:maxLines">1</item>
         <item name="android:selectAllOnFocus">true</item>
-r    </style>
+    </style>
+
+    <style name="DefaultAddressViewStyle">
+        <item name="readOnly">false</item>
+    </style>
 
 </resources>

@@ -1,6 +1,7 @@
 package com.manuelpeinado.addressfragment;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.location.Address;
 import android.location.Location;
 import android.os.Parcel;
@@ -15,7 +16,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
@@ -140,12 +140,18 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     public AddressView(Context context, AttributeSet attrs) {
+        this(context, attrs, R.attr.addressViewStyle);
+    }
+    
+    public AddressView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
 
         setFocusable(true);
         setFocusableInTouchMode(true);
         setOrientation(LinearLayout.HORIZONTAL);
         setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+
+        parseAttrs(attrs, defStyle);
 
         // TODO call this using reflection
         // setLayoutTransition(new LayoutTransition());
@@ -155,6 +161,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         mAddressEditText = (AutoCompleteTextView) findViewById(R.id.addressEditText);
         mAddressEditTextPadding = Utils.getPadding(mAddressEditText);
         mButtonSize = getResources().getDimension(R.dimen.aet__action_button_size);
+        
 
         // This is important or else we get bitten by this:
         // http://stackoverflow.com/questions/15024892/two-searchviews-in-one-activity-and-screen-rotation
@@ -170,6 +177,15 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         mUseMyLocationBtn.setOnClickListener(this);
 
         updateTextInMyLocationMode();
+    }
+
+    private void parseAttrs(AttributeSet attrs, int defStyle) {
+        if (attrs == null) {
+            return;
+        }
+        TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.AddressView, defStyle, 0);
+        mReadOnly = a.getBoolean(R.styleable.AddressViewLib_addressViewStyle, mReadOnly);
+        a.recycle();
     }
 
     public void setOnNewAddressListener(OnNewAddressListener listener) {

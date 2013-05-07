@@ -27,7 +27,6 @@ public class PopularSearchesActivity extends SherlockFragmentActivity implements
         AddressFragment addressFragment = (AddressFragment) fm.findFragmentById(R.id.address);
         mAddressView = addressFragment.getAddressView();
         mAddressView.setUsingMyLocation(false);
-        mAddressView.setReadOnly(true);
         mAddressView.setShowMyLocationButton(false);
         mAddressView.setHint(R.string.select_a_search_text);
     }
