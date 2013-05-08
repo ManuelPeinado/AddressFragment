@@ -36,6 +36,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         OnItemClickListener, OnFocusChangeListener {
 
     protected static final String TAG = AddressView.class.getSimpleName();
+    static final int DEF_STYLE = R.attr.addressViewStyle;
     /**
      * This will be null if the fragment provides its own locations or does not
      * show my location address
@@ -56,7 +57,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
      */
     private Location mLastLocation;
     /** True if the fragment is currently showing the device's location */
-    private boolean mIsUsingMyLocation = true;
+    private boolean mShowMyLocation = true;
     private Address mAddress;
     private String mPrettyAddress;
     private GeocodingTask mGeocodingTask;
@@ -94,6 +95,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private boolean mHasFocus;
     private int[] mAddressEditTextPadding;
     private float mButtonSize;
+    private boolean mInitializing = true;
     /**
      * If true, instead of using the real location of the device we use a
      * simulated location that goes moves from Washington Square to Marcus
@@ -140,9 +142,9 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     public AddressView(Context context, AttributeSet attrs) {
-        this(context, attrs, R.attr.addressViewStyle);
+        this(context, attrs, DEF_STYLE);
     }
-    
+
     public AddressView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
 
@@ -150,8 +152,6 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         setFocusableInTouchMode(true);
         setOrientation(LinearLayout.HORIZONTAL);
         setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-
-        parseAttrs(attrs, defStyle);
 
         // TODO call this using reflection
         // setLayoutTransition(new LayoutTransition());
@@ -161,7 +161,6 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         mAddressEditText = (AutoCompleteTextView) findViewById(R.id.addressEditText);
         mAddressEditTextPadding = Utils.getPadding(mAddressEditText);
         mButtonSize = getResources().getDimension(R.dimen.aet__action_button_size);
-        
 
         // This is important or else we get bitten by this:
         // http://stackoverflow.com/questions/15024892/two-searchviews-in-one-activity-and-screen-rotation
@@ -176,16 +175,23 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         mUseMyLocationBtn = (ImageView) findViewById(R.id.useMyLocationButton);
         mUseMyLocationBtn.setOnClickListener(this);
 
-        updateTextInMyLocationMode();
+        parseAttrs(attrs, defStyle);
+        mInitializing = false;
     }
 
-    private void parseAttrs(AttributeSet attrs, int defStyle) {
-        if (attrs == null) {
-            return;
+    void parseAttrs(AttributeSet attrs, int defStyle) {
+        if (attrs != null) {
+            TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.AddressView, defStyle, 0);
+            mReadOnly = a.getBoolean(R.styleable.AddressView_readOnly, mReadOnly);
+            mShowMyLocation = a.getBoolean(R.styleable.AddressView_showMyLocation, mShowMyLocation);
+            a.recycle();
         }
-        TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.AddressView, defStyle, 0);
-        mReadOnly = a.getBoolean(R.styleable.AddressViewLib_addressViewStyle, mReadOnly);
-        a.recycle();
+        
+        // Default visibility of the "my location" button is determined by whether we are in read-only mode
+        mShowMyLocationButton = !mReadOnly;
+        
+        setReadOnly(mReadOnly);
+        setShowMyLocation(mShowMyLocation, mInitializing);
     }
 
     public void setOnNewAddressListener(OnNewAddressListener listener) {
@@ -207,7 +213,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             Log.v(TAG, "Removing location provider");
             return;
         }
-        if (mIsUsingMyLocation) {
+        if (mShowMyLocation) {
             // If we were showing "My location" now we need to show the hint "Waiting for location"
             setText("");
             if (!mPaused) {
@@ -233,17 +239,17 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         if (isUserInitiated) {
             // If the provider sends a user-initiated location, we can no longer be in "using 
             // my location", as any new fixes would overwrite the location set by the user
-            mIsUsingMyLocation = false;
+            mShowMyLocation = false;
             updateButtonVisibility();
             pauseLocationProvider();
-        } else if (!mIsUsingMyLocation || mLocationProviderDisabled) {
+        } else if (!mShowMyLocation || mLocationProviderDisabled) {
             // We shouldn't receive non user-initiated locations from the provider, but in case
             // we receive one anyway we have to ignore it
             return;
         }
 
         Utils.logv(TAG, "setLocation", Utils.prettyPrint(newLocation));
-        if (mIsUsingMyLocation && mLocationProvider != null && mIsSingleShot) {
+        if (mShowMyLocation && mLocationProvider != null && mIsSingleShot) {
             disableLocationProvider();
         }
 
@@ -260,16 +266,16 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     public void setUsingMyLocation(boolean value) {
-        setUsingMyLocation(value, false);
+        setShowMyLocation(value, false);
     }
 
-    private void setUsingMyLocation(boolean value, boolean force) {
-        if (!force && mIsUsingMyLocation == value) {
+    private void setShowMyLocation(boolean value, boolean force) {
+        if (!force && mShowMyLocation == value) {
             return;
         }
-        mIsUsingMyLocation = value;
+        mShowMyLocation = value;
         updateButtonVisibility();
-        if (mIsUsingMyLocation) {
+        if (mShowMyLocation) {
             if (mLocationProvider != null && !mPaused) {
                 resumeLocationProvider();
             }
@@ -284,8 +290,8 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         }
     }
 
-    public boolean isUsingMyLocation() {
-        return mIsUsingMyLocation;
+    public boolean getShowMyLocation() {
+        return mShowMyLocation;
     }
 
     public void setSingleShot(boolean value) {
@@ -293,7 +299,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             return;
         }
         mIsSingleShot = value;
-        if (!mIsUsingMyLocation || mLocationProvider == null) {
+        if (!mShowMyLocation || mLocationProvider == null) {
             // If single shot mode is activated but we are not using my location
             // or we don't have a location provider then there's nothing to do
             return;
@@ -353,7 +359,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
      * the state: // Bundle in addressView.setState(in);
      */
     public static class State implements Parcelable {
-        boolean mIsUsingMyLocation;
+        boolean mShowMyLocation;
         String mEditTextContent;
 
         public State() {
@@ -364,7 +370,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         }
 
         private void readFromParcel(Parcel in) {
-            mIsUsingMyLocation = in.readInt() == 1;
+            mShowMyLocation = in.readInt() == 1;
             mEditTextContent = in.readString();
         }
 
@@ -375,7 +381,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
 
         @Override
         public void writeToParcel(Parcel out, int flags) {
-            out.writeInt(mIsUsingMyLocation ? 1 : 0);
+            out.writeInt(mShowMyLocation ? 1 : 0);
             out.writeString(mEditTextContent);
         }
 
@@ -400,8 +406,8 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     public void setState(State newState) {
-        if (newState.mIsUsingMyLocation) {
-            setUsingMyLocation(true, true);
+        if (newState.mShowMyLocation) {
+            setShowMyLocation(true, true);
         } else {
             search(newState.mEditTextContent, false);
         }
@@ -409,15 +415,15 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
 
     public State getState() {
         State state = new State();
-        state.mIsUsingMyLocation = mIsUsingMyLocation;
-        if (!mIsUsingMyLocation) {
+        state.mShowMyLocation = mShowMyLocation;
+        if (!mShowMyLocation) {
             state.mEditTextContent = getAddressText();
         }
         return state;
     }
 
     private void updateTextInMyLocationMode() {
-        if (!mIsUsingMyLocation) {
+        if (!mShowMyLocation) {
             return;
         }
         if (mLocationProvider == null) {
@@ -520,7 +526,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
      * modifiable programmatically
      */
     public void setReadOnly(boolean value) {
-        if (mReadOnly == value) {
+        if (!mInitializing  && mReadOnly == value) {
             return;
         }
         mReadOnly = value;
@@ -547,8 +553,8 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         boolean shouldHideButton;
         if (mHideButtonAutomatically) {
             if (mHasFocus) {
-                shouldHideButton = false;
-            } else if (mIsUsingMyLocation) {
+                shouldHideButton = !mShowMyLocationButton;
+            } else if (mShowMyLocation) {
                 shouldHideButton = !mShowingProgressBar && !mIsSingleShot;
             } else {
                 shouldHideButton = !mShowingProgressBar && !mShowMyLocationButton;
@@ -570,7 +576,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private void search(String text, boolean showDisambiguationDialog) {
         setText(text);
         clearEditTextFocus();
-        mIsUsingMyLocation = false;
+        mShowMyLocation = false;
         if (!TextUtils.isEmpty(text)) {
             startGeocoding(text, showDisambiguationDialog);
         }
@@ -578,7 +584,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
 
     // TODO comment this
     public void resolveAddress(final Callback<Location> callback) {
-        if (!mIsUsingMyLocation || mLocationProvider != null) {
+        if (!mShowMyLocation || mLocationProvider != null) {
             callback.onResultReady(mLastLocation);
             return;
         }
@@ -602,7 +608,9 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     public void onFocusChange(View v, boolean hasFocus) {
         mHasFocus = hasFocus;
         if (hasFocus) {
-            Utils.forceShowVirtualKeyboard(getContext());
+            if (!mReadOnly) { 
+                Utils.forceShowVirtualKeyboard(getContext());
+            }
             hideProgressBar();
             mUseMyLocationBtn.setImageResource(R.drawable.ic_navigation_cancel);
             pauseLocationProvider();
@@ -690,7 +698,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             cancelCurrentEdit();
         } else {
             // This means that the button has the semantics "use my location"
-            if (mIsUsingMyLocation) {
+            if (mShowMyLocation) {
                 if (mIsSingleShot && mLocationProviderDisabled) {
                     // If the provider is disabled due to us being on single shot mode, the 
                     // user clicking on the my location button is interpreted as a request to
@@ -708,7 +716,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     private void cancelCurrentEdit() {
-        if (mIsUsingMyLocation) {
+        if (mShowMyLocation) {
             clearEditTextFocus();
             updateTextInMyLocationMode();
             resumeLocationProvider();
@@ -757,7 +765,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     private void resumeLocationProvider() {
-        if (mIsUsingMyLocation && mLocationProvider != null) {
+        if (mShowMyLocation && mLocationProvider != null) {
             Log.v(TAG, "Resuming location provider");
             mLocationProvider.setAddressView(this);
             applyMostRecentLocation();
