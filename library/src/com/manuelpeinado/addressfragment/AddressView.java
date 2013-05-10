@@ -62,6 +62,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private String mPrettyAddress;
     private GeocodingTask mGeocodingTask;
     private ReverseGeocodingTask mReverseGeocodingTask;
+    private static boolean MOCK_REVERSE_GEOCODING_FAILURE = true; 
     /**
      * A user-initiated reverse geocoding task is one which starts because the
      * user has clicked on the "cancel current edit" button, as opposed to the
@@ -465,6 +466,9 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         Log.v(TAG, "Starting reverse geocoding of location " + Utils.prettyPrint(location));
         mIsReverseGeocodingTaskUserInitiated = isUserInitiated;
         mReverseGeocodingTask = new ReverseGeocodingTask(getContext());
+        if (MOCK_REVERSE_GEOCODING_FAILURE) {
+            mReverseGeocodingTask.setMockFailure(true);
+        }
         mReverseGeocodingTask.setListener(this);
         mReverseGeocodingTask.execute(location);
         showProgressBar();
@@ -474,9 +478,13 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     public void onReverseGeocodingResultReady(ReverseGeocodingTask sender, Address result) {
         mReverseGeocodingTask = null;
         hideProgressBar();
+        // TODO use a different method to notify error to listeners
         if (result == null) {
-            // TODO use a resource for this string
-            Utils.longToast(getContext(), "Location could not be resolved");
+            Utils.logv(TAG, "onReverseGeocodingResultReady", "Error in reverse geocoding");
+            Utils.longToast(getContext(), R.string.aet__geocoding_error_toast);
+            showDefaultHint();
+            updateButtonVisibility();
+            disableLocationProvider();
             return;
         }
         mLastLocation = sender.getLocation();
@@ -555,7 +563,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             if (mHasFocus) {
                 shouldHideButton = !mShowMyLocationButton;
             } else if (mShowMyLocation) {
-                shouldHideButton = !mShowingProgressBar && !mIsSingleShot;
+                shouldHideButton = hasAddress() && !mShowingProgressBar && !mIsSingleShot;
             } else {
                 shouldHideButton = !mShowingProgressBar && !mShowMyLocationButton;
             }
@@ -571,6 +579,10 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         boolean shouldShowMyLocationBtn = mShowMyLocationButton && !mShowingProgressBar;
         mUseMyLocationBtn.setVisibility(shouldShowMyLocationBtn ? View.VISIBLE : View.INVISIBLE);
         mProgressBar.setVisibility(mShowingProgressBar ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    private boolean hasAddress() {
+        return mLastLocation != null && mAddress != null;
     }
 
     private void search(String text, boolean showDisambiguationDialog) {
@@ -706,10 +718,11 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         } else {
             // This means that the button has the semantics "use my location"
             if (mShowMyLocation) {
-                if (mIsSingleShot && mLocationProviderDisabled) {
+                if ((!hasAddress() || mIsSingleShot) && mLocationProviderDisabled) {
                     // If the provider is disabled due to us being on single shot mode, the 
                     // user clicking on the my location button is interpreted as a request to
-                    // obtain a new location fix
+                    // obtain a new location fix. Also, if the last reverse geocoding failed (that's
+                    // what the !hasAddress() is for)
                     enableLocationProvider();
                 } else {
                     if (mOnMyLocationClickIgnoredListener != null) {

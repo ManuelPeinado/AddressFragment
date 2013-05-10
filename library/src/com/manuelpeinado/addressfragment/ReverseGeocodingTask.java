@@ -11,9 +11,11 @@ import android.os.AsyncTask;
 
 public class ReverseGeocodingTask extends AsyncTask<Location, Void, Address> {
 
+    protected static final String TAG = ReverseGeocodingTask.class.getSimpleName();
     private Context mContext;
     private ReverseGeocodingListener mListener;
     private Location mLocation;
+    private boolean mockFailure;
     
     public interface ReverseGeocodingListener {
         void onReverseGeocodingResultReady(ReverseGeocodingTask sender, Address result);
@@ -33,6 +35,11 @@ public class ReverseGeocodingTask extends AsyncTask<Location, Void, Address> {
 
     @Override
     protected Address doInBackground(Location... params) {
+        if (mockFailure) {
+            Utils.logv(TAG, "doInBackground", "Mocking failure");
+            Utils.sleep(2000);
+            return null;
+        }
         Geocoder geocoder = new Geocoder(mContext);
         List<Address> results;
         try {
@@ -52,5 +59,9 @@ public class ReverseGeocodingTask extends AsyncTask<Location, Void, Address> {
         if (mListener != null) {
             mListener.onReverseGeocodingResultReady(this, result);
         }
+    }
+
+    public void setMockFailure(boolean mockFailure) {
+        this.mockFailure = mockFailure;
     }
 }
