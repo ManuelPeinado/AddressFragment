@@ -143,11 +143,15 @@ public class Utils {
     }
 
     public static void setEditTextReadOnly(EditText editText, boolean readOnly) {
+        Object tag = editText.getTag(RANDOM_TAG_KEY);
+        boolean wasReadOnly = tag != null;
+        if (readOnly == wasReadOnly) {
+            return;
+        }
         if (readOnly) {
             editText.setTag(RANDOM_TAG_KEY, editText.getKeyListener());
             editText.setKeyListener(null);
         } else {
-            Object tag = editText.getTag(RANDOM_TAG_KEY);
             editText.setKeyListener((KeyListener) tag);
         }
     }
