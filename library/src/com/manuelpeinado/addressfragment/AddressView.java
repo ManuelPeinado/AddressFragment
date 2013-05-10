@@ -631,7 +631,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     @Override
-    public void onGeocodingResultReady(GeocodingTask sender, Address result) {
+    public void onGeocodingSuccess(GeocodingTask sender, Address result) {
         mGeocodingTask = null;
         hideProgressBar();
         mLastLocation = Utils.addressToLocation(result);
@@ -650,7 +650,14 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     @Override
-    public void onGeocodingCanceled(GeocodingTask sender) {
+    public void onGeocodingFailure(GeocodingTask sender) {
+        Log.w(TAG, "Geocoding of address " + sender.getAddressText() + " failed");
+        hideProgressBar();
+        cancelCurrentEdit();
+    }
+
+    @Override
+    public void onGeocodingCancel(GeocodingTask sender) {
         Log.v(TAG, "Geocoding of address " + sender.getAddressText() + " canceled by user");
         hideProgressBar();
         cancelCurrentEdit();

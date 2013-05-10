@@ -127,6 +127,10 @@ public class Utils {
         Toast.makeText(ctx, text, Toast.LENGTH_LONG).show();
     }
 
+    public static void longToast(Context ctx, int resId) {
+        Toast.makeText(ctx, resId, Toast.LENGTH_LONG).show();
+    }
+
     public static void shortToast(Context ctx, String text) {
         Toast.makeText(ctx, text, Toast.LENGTH_SHORT).show();
     }

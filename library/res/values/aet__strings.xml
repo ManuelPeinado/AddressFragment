@@ -6,5 +6,6 @@
     <string name="aet__use_current_location">Use current device location</string>
     <string name="aet__address_edit_text_hint">Enter address here</string>
     <string name="aet__address_disambiguation_dialog_title">Select address</string>
-
+    <string name="aet__geocoding_error_toast">Could not resolve address</string>
+    
 </resources>

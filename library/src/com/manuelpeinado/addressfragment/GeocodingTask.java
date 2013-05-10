@@ -23,9 +23,9 @@ public class GeocodingTask extends AsyncTask<String, Void, List<Address>> {
     private boolean mShowDisambiguationDialog = true;
 
     public interface GeocodingTaskListener {
-        void onGeocodingResultReady(GeocodingTask sender, Address result);
-
-        void onGeocodingCanceled(GeocodingTask geocodingTask);
+        void onGeocodingSuccess(GeocodingTask sender, Address result);
+        void onGeocodingFailure(GeocodingTask geocodingTask);
+        void onGeocodingCancel(GeocodingTask geocodingTask);
     }
 
     public GeocodingTask(FragmentActivity activity) {
@@ -57,10 +57,11 @@ public class GeocodingTask extends AsyncTask<String, Void, List<Address>> {
         if (mListener == null) {
             return;
         }
-        if (results.size() == 0) {
-            mListener.onGeocodingResultReady(this, null);
+        if (results == null || results.size() == 0) {
+            Utils.longToast(mActivity, R.string.aet__geocoding_error_toast);
+            mListener.onGeocodingFailure(this);
         } else if (results.size() == 1 || !mShowDisambiguationDialog) {
-            mListener.onGeocodingResultReady(this, results.get(0));
+            mListener.onGeocodingSuccess(this, results.get(0));
         } else {
             showDisambiguationDialog(results);
         }
@@ -77,13 +78,13 @@ public class GeocodingTask extends AsyncTask<String, Void, List<Address>> {
                 builder.setItems(items, new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mListener.onGeocodingResultReady(GeocodingTask.this, results.get(which));
+                        mListener.onGeocodingSuccess(GeocodingTask.this, results.get(which));
                     }
                 });
                 builder.setNegativeButton(android.R.string.cancel, new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mListener.onGeocodingCanceled(GeocodingTask.this);
+                        mListener.onGeocodingFailure(GeocodingTask.this);
                     }
                 });
                 return builder.create();
