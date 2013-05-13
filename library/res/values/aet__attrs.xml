@@ -2,12 +2,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <declare-styleable name="AddressView">
-        <attr name="readOnly" format="boolean" />
-        <attr name="showMyLocation" format="boolean" />
+        <attr name="av__textAppearance" format="reference" />
+        <attr name="av__readOnly" format="boolean" />
+        <attr name="av__showMyLocation" format="boolean" />
     </declare-styleable>
-    
-    <declare-styleable name="AddressViewLib">
-        <attr name="addressViewStyle" format="reference" />
-    </declare-styleable>
+
+    <attr name="av__addressViewStyle" format="reference" />
 
 </resources>

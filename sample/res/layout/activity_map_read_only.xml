@@ -19,7 +19,7 @@
         android:background="#AFFF" >
 
         <fragment
-            custom:readOnly="true"
+            custom:av__readOnly="true"
             android:id="@+id/address"
             android:name="com.manuelpeinado.addressfragment.AddressFragment"
             android:layout_width="match_parent"

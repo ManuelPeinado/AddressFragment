@@ -17,7 +17,7 @@
             android:name="com.manuelpeinado.addressfragment.AddressFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            custom:readOnly="true" />
+            custom:av__readOnly="true" />
     </FrameLayout>
 
     <View

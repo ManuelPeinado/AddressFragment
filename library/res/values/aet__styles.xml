@@ -1,37 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="AddressViewWidget" />
+    <style name="Widget" />
 
-    <style name="Internal__AddressViewWidget__Button">
-        <item name="android:layout_width">@dimen/aet__action_button_size</item>
-        <item name="android:layout_height">@dimen/aet__action_button_size</item>
-        <item name="android:layout_gravity">right</item>
-        <item name="android:padding">@dimen/aet__vertical_margin_small</item>
-        <item name="android:indeterminate">true</item>
-    </style>
+    <style name="Widget.AV" />
 
-    <style name="AddressViewWidget.ProgressBar" parent="@style/Internal__AddressViewWidget__Button">
-        <item name="android:id">@id/progressBar</item>
-        <item name="android:visibility">invisible</item>
-    </style>
-
-    <style name="AddressViewWidget.ButtonBase" parent="@style/Internal__AddressViewWidget__Button">
-        <item name="android:background">@android:drawable/list_selector_background</item>
-        <item name="android:id">@id/useMyLocationButton</item>
-        <item name="android:contentDescription">@string/aet__use_current_location</item>
-        <item name="android:scaleType">fitCenter</item>
-        <item name="android:src">@drawable/ic_device_access_location_found</item>
-    </style>
-
-    <style name="AddressViewWidget.Button" parent="@style/AddressViewWidget.ButtonBase">
-        <item name="android:background">@android:drawable/list_selector_background</item>
-    </style>
-
-    <style name="AddressViewWidget.EditText">
-        <item name="android:id">@id/addressEditText</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/aet__action_button_size</item>
+    <style name="AV.__Widget.AutoCompleteTextView" parent="Widget.AV">
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+        <item name="android:clickable">true</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMediumInverse</item>
+        <item name="android:completionHintView">@android:layout/simple_dropdown_item_1line</item>
+        <item name="android:dropDownWidth">wrap_content</item>
         <item name="android:layout_gravity">left|bottom</item>
         <item name="android:completionThreshold">2</item>
         <item name="android:hint">@string/aet__address_edit_text_hint</item>
@@ -41,8 +21,40 @@
         <item name="android:selectAllOnFocus">true</item>
     </style>
 
-    <style name="DefaultAddressViewStyle">
-        <item name="readOnly">false</item>
+    <style name="Widget.AV.AutoCompleteTextView" parent="AV.__Widget.AutoCompleteTextView">
+        <item name="android:textColor">@color/aet__primary_text_holo_dark</item>
+        <item name="android:dropDownSelector">@drawable/abs__list_selector_holo_dark</item>
+        <item name="android:popupBackground">@drawable/abs__menu_dropdown_panel_holo_dark</item>
+    </style>
+
+    <style name="Widget.AV.Light.AutoCompleteTextView" parent="AV.__Widget.AutoCompleteTextView">
+        <item name="android:textColor">@color/aet__primary_text_holo_light</item>
+        <item name="android:dropDownSelector">@drawable/abs__list_selector_holo_light</item>
+        <item name="android:popupBackground">@drawable/abs__menu_dropdown_panel_holo_light</item>
+    </style>
+
+    <style name="AV.__Widget.Button" parent="Widget.AV">
+        <item name="android:layout_gravity">right</item>
+        <item name="android:padding">@dimen/aet__vertical_margin_small</item>
+        <item name="android:indeterminate">true</item>
+    </style>
+
+    <style name="Widget.AV.ProgressBar" parent="@style/AV.__Widget.Button"></style>
+
+    <style name="AV.__Widget.ButtonBase" parent="@style/AV.__Widget.Button">
+        <item name="android:background">@android:drawable/list_selector_background</item>
+        <item name="android:contentDescription">@string/aet__use_current_location</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:src">@drawable/ic_device_access_location_found</item>
+    </style>
+
+    <style name="Widget.AV.Button" parent="@style/AV.__Widget.ButtonBase">
+        <item name="android:background">@android:drawable/list_selector_background</item>
+    </style>
+
+    <style name="Widget.AV.AddressView">
+        <item name="av__readOnly">false</item>
+        <item name="av__textAppearance">@android:style/TextAppearance.Medium</item>
     </style>
 
 </resources>

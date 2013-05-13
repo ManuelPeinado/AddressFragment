@@ -8,6 +8,7 @@
     <string name="end_address">End address</string>
     <string name="activity_title_map_read_only">Map demo (read-only)</string>
     <string name="activity_title_map">Map demo</string>
+    <string name="activity_title_styling">Styling demo</string>
     <string name="activity_title_list">List demo</string>
     <string name="activity_title_directions">Directions demo</string>
     <string name="activity_title_popular_searches">Popular searches</string>

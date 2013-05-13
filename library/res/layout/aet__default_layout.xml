@@ -5,11 +5,24 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
-        <AutoCompleteTextView style="@style/AddressViewWidget.EditText" />
+        <AutoCompleteTextView
+            android:id="@id/addressEditText"
+            style="@style/Widget.AV.Light.AutoCompleteTextView"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/aet__action_button_size" />
 
-        <ProgressBar style="@style/AddressViewWidget.ProgressBar" />
+        <ProgressBar
+            android:id="@id/progressBar"
+            style="@style/Widget.AV.ProgressBar"
+            android:layout_width="@dimen/aet__action_button_size"
+            android:layout_height="@dimen/aet__action_button_size"
+            android:visibility="invisible" />
 
-        <ImageButton style="@style/AddressViewWidget.Button" />
+        <ImageButton
+            android:id="@id/useMyLocationButton"
+            style="@style/Widget.AV.Button"
+            android:layout_width="@dimen/aet__action_button_size"
+            android:layout_height="@dimen/aet__action_button_size" />
     </FrameLayout>
 
 </merge>

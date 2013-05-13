@@ -36,7 +36,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         OnItemClickListener, OnFocusChangeListener {
 
     protected static final String TAG = AddressView.class.getSimpleName();
-    static final int DEF_STYLE = R.attr.addressViewStyle;
+    static final int DEF_STYLE = R.attr.av__addressViewStyle;
     /**
      * This will be null if the fragment provides its own locations or does not
      * show my location address
@@ -62,7 +62,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private String mPrettyAddress;
     private GeocodingTask mGeocodingTask;
     private ReverseGeocodingTask mReverseGeocodingTask;
-    private static boolean MOCK_REVERSE_GEOCODING_FAILURE = true; 
+    private static boolean MOCK_REVERSE_GEOCODING_FAILURE = false; 
     /**
      * A user-initiated reverse geocoding task is one which starts because the
      * user has clicked on the "cancel current edit" button, as opposed to the
@@ -97,6 +97,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private int[] mAddressEditTextPadding;
     private float mButtonSize;
     private boolean mInitializing = true;
+    private int mTextAppearance;
     /**
      * If true, instead of using the real location of the device we use a
      * simulated location that goes moves from Washington Square to Marcus
@@ -182,9 +183,10 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
 
     void parseAttrs(AttributeSet attrs, int defStyle) {
         if (attrs != null) {
-            TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.AddressView, defStyle, 0);
-            mReadOnly = a.getBoolean(R.styleable.AddressView_readOnly, mReadOnly);
-            mShowMyLocation = a.getBoolean(R.styleable.AddressView_showMyLocation, mShowMyLocation);
+            TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.AddressView, defStyle, R.style.Widget_AV_AddressView);
+            mReadOnly = a.getBoolean(R.styleable.AddressView_av__readOnly, mReadOnly);
+            mShowMyLocation = a.getBoolean(R.styleable.AddressView_av__showMyLocation, mShowMyLocation);
+            mTextAppearance = a.getResourceId(R.styleable.AddressView_av__textAppearance, 0);
             a.recycle();
         }
         
@@ -193,6 +195,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         
         setReadOnly(mReadOnly);
         setShowMyLocation(mShowMyLocation, mInitializing);
+        mAddressEditText.setTextAppearance(getContext(), mTextAppearance);
     }
 
     public void setOnNewAddressListener(OnNewAddressListener listener) {
