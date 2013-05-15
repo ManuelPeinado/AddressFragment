@@ -1,0 +1,19 @@
+<resources>
+
+    <style name="AppTheme" parent="Theme.Sherlock">
+        <item name="av__addressViewStyle">@style/StyledAddressView</item>
+    </style>
+
+    <style name="AppTheme.Light" parent="Theme.Sherlock.Light">
+        <item name="av__addressViewStyle">@style/StyledAddressView.Light</item>
+    </style>
+
+    <style name="AppTheme.Light.DarkActionBar" parent="Theme.Sherlock.Light.DarkActionBar">
+        <item name="av__addressViewStyle">@style/StyledAddressView.Light</item>
+    </style>
+
+    <style name="AppTheme.StyledAddressView" parent="AppTheme">
+        <item name="av__addressViewStyle">@style/StyledAddressView.Light</item>
+    </style>
+
+</resources>

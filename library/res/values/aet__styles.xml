@@ -9,7 +9,6 @@
         <item name="android:focusable">true</item>
         <item name="android:focusableInTouchMode">true</item>
         <item name="android:clickable">true</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceMediumInverse</item>
         <item name="android:completionHintView">@android:layout/simple_dropdown_item_1line</item>
         <item name="android:dropDownWidth">wrap_content</item>
         <item name="android:layout_gravity">left|bottom</item>
@@ -24,13 +23,11 @@
     <style name="Widget.AV.AutoCompleteTextView" parent="AV.__Widget.AutoCompleteTextView">
         <item name="android:textColor">@color/aet__primary_text_holo_dark</item>
         <item name="android:dropDownSelector">@drawable/abs__list_selector_holo_dark</item>
-        <item name="android:popupBackground">@drawable/abs__menu_dropdown_panel_holo_dark</item>
     </style>
 
     <style name="Widget.AV.Light.AutoCompleteTextView" parent="AV.__Widget.AutoCompleteTextView">
         <item name="android:textColor">@color/aet__primary_text_holo_light</item>
         <item name="android:dropDownSelector">@drawable/abs__list_selector_holo_light</item>
-        <item name="android:popupBackground">@drawable/abs__menu_dropdown_panel_holo_light</item>
     </style>
 
     <style name="AV.__Widget.Button" parent="Widget.AV">
@@ -45,7 +42,6 @@
         <item name="android:background">@android:drawable/list_selector_background</item>
         <item name="android:contentDescription">@string/aet__use_current_location</item>
         <item name="android:scaleType">fitCenter</item>
-        <item name="android:src">@drawable/ic_device_access_location_found</item>
     </style>
 
     <style name="Widget.AV.Button" parent="@style/AV.__Widget.ButtonBase">
@@ -55,6 +51,15 @@
     <style name="Widget.AV.AddressView">
         <item name="av__readOnly">false</item>
         <item name="av__textAppearance">@android:style/TextAppearance.Medium</item>
+        <item name="av__cancelIcon">@drawable/av__ic_navigation_cancel_holo_dark</item>
+        <item name="av__myLocationIcon">@drawable/av__ic_device_access_location_found_holo_dark</item>
+        <item name="av__dropDownBackground">@drawable/av__menu_dropdown_panel_holo_dark</item>
     </style>
 
+    <style name="Widget.AV.AddressView.Light">
+        <item name="av__cancelIcon">@drawable/av__ic_navigation_cancel_holo_light</item>
+        <item name="av__myLocationIcon">@drawable/av__ic_device_access_location_found_holo_light</item>
+        <item name="av__dropDownBackground">@drawable/av__menu_dropdown_panel_holo_light</item>
+    </style>
+    
 </resources>

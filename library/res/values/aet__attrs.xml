@@ -5,6 +5,9 @@
         <attr name="av__textAppearance" format="reference" />
         <attr name="av__readOnly" format="boolean" />
         <attr name="av__showMyLocation" format="boolean" />
+        <attr name="av__cancelIcon" format="reference" />
+        <attr name="av__myLocationIcon" format="reference" />
+        <attr name="av__dropDownBackground" format="reference" />
     </declare-styleable>
 
     <attr name="av__addressViewStyle" format="reference" />

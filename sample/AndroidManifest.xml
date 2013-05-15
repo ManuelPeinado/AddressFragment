@@ -40,29 +40,34 @@
         </activity>
         <activity
             android:name="com.manuelpeinado.addressfragment.demo.MapReadOnlyActivity"
-            android:label="@string/activity_title_map_read_only" />
+            android:label="@string/activity_title_map_read_only"
+            android:theme="@style/AppTheme.Light.DarkActionBar" />
         <activity
             android:name="com.manuelpeinado.addressfragment.demo.MapActivity"
-            android:label="@string/activity_title_map" />
+            android:label="@string/activity_title_map"
+            android:theme="@style/AppTheme.Light.DarkActionBar" />
         <activity
             android:name="com.manuelpeinado.addressfragment.demo.VirtualWalkActivity"
-            android:label="@string/activity_title_virtual_walk" />
+            android:label="@string/activity_title_virtual_walk"
+            android:theme="@style/AppTheme.Light.DarkActionBar" />
         <activity
             android:name="com.manuelpeinado.addressfragment.demo.SingleShotVirtualWalkActivity"
-            android:label="@string/activity_title_virtual_walk_single_shot" />
+            android:label="@string/activity_title_virtual_walk_single_shot"
+            android:theme="@style/AppTheme.Light.DarkActionBar" />
         <activity
             android:name="com.manuelpeinado.addressfragment.demo.ListActivity"
             android:label="@string/activity_title_list" />
         <activity
             android:name="com.manuelpeinado.addressfragment.demo.DirectionsActivity"
-            android:label="@string/activity_title_directions" />
+            android:label="@string/activity_title_directions"
+            android:theme="@style/AppTheme.Light.DarkActionBar" />
         <activity
             android:name="com.manuelpeinado.addressfragment.demo.PopularSearchesActivity"
             android:label="@string/activity_title_popular_searches" />
         <activity
             android:name="com.manuelpeinado.addressfragment.demo.ActionBarActivity"
             android:label="@string/activity_title_action_bar"
-            android:theme="@style/AppTheme.Light" />
+            android:theme="@style/AppTheme.Light.DarkActionBar" />
         <activity
             android:name="com.manuelpeinado.addressfragment.demo.StylingActivity"
             android:label="@string/activity_title_styling"

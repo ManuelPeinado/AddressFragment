@@ -97,6 +97,9 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private int[] mAddressEditTextPadding;
     private float mButtonSize;
     private boolean mInitializing = true;
+    private int mCancelIcon;
+    private int mMyLocationIcon;
+    private int mDropDownBackground;
     private int mTextAppearance;
     /**
      * If true, instead of using the real location of the device we use a
@@ -186,16 +189,20 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.AddressView, defStyle, R.style.Widget_AV_AddressView);
             mReadOnly = a.getBoolean(R.styleable.AddressView_av__readOnly, mReadOnly);
             mShowMyLocation = a.getBoolean(R.styleable.AddressView_av__showMyLocation, mShowMyLocation);
+            mCancelIcon = a.getResourceId(R.styleable.AddressView_av__cancelIcon, 0);
+            mMyLocationIcon = a.getResourceId(R.styleable.AddressView_av__myLocationIcon, 0);
+            mDropDownBackground = a.getResourceId(R.styleable.AddressView_av__dropDownBackground, 0);
             mTextAppearance = a.getResourceId(R.styleable.AddressView_av__textAppearance, 0);
             a.recycle();
         }
         
         // Default visibility of the "my location" button is determined by whether we are in read-only mode
         mShowMyLocationButton = !mReadOnly;
-        
+        mUseMyLocationBtn.setImageResource(mMyLocationIcon);
         setReadOnly(mReadOnly);
-        setShowMyLocation(mShowMyLocation, mInitializing);
+        mAddressEditText.setDropDownBackgroundResource(mDropDownBackground);
         mAddressEditText.setTextAppearance(getContext(), mTextAppearance);
+        setShowMyLocation(mShowMyLocation, mInitializing);
     }
 
     public void setOnNewAddressListener(OnNewAddressListener listener) {
@@ -627,10 +634,10 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
                 Utils.forceShowVirtualKeyboard(getContext());
             }
             hideProgressBar();
-            mUseMyLocationBtn.setImageResource(R.drawable.ic_navigation_cancel);
+            mUseMyLocationBtn.setImageResource(mCancelIcon);
             pauseLocationProvider();
         } else {
-            mUseMyLocationBtn.setImageResource(R.drawable.ic_device_access_location_found);
+            mUseMyLocationBtn.setImageResource(mMyLocationIcon);
         }
         updateButtonVisibility();
     }
