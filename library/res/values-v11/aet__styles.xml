@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="Widget.AV.Button" parent="@style/AV.__Widget.ButtonBase">
-        <item name="android:background">?android:attr/selectableItemBackground</item>
+    <style name="Widget.AV.AddressView" parent="AV.__Widget.AddressViewBase">
+        <item name="av__buttonBackground">?android:attr/selectableItemBackground</item>
     </style>
 
 </resources>

@@ -32,28 +32,29 @@
 
     <style name="AV.__Widget.Button" parent="Widget.AV">
         <item name="android:layout_gravity">right</item>
-        <item name="android:padding">@dimen/aet__vertical_margin_small</item>
         <item name="android:indeterminate">true</item>
     </style>
 
-    <style name="Widget.AV.ProgressBar" parent="@style/AV.__Widget.Button"></style>
+    <style name="Widget.AV.ProgressBar" parent="@style/AV.__Widget.Button">
+        <item name="android:padding">@dimen/aet__vertical_margin_small</item>
+    </style>
 
-    <style name="AV.__Widget.ButtonBase" parent="@style/AV.__Widget.Button">
-        <item name="android:background">@android:drawable/list_selector_background</item>
+    <style name="Widget.AV.Button" parent="@style/AV.__Widget.Button">
         <item name="android:contentDescription">@string/aet__use_current_location</item>
         <item name="android:scaleType">fitCenter</item>
     </style>
 
-    <style name="Widget.AV.Button" parent="@style/AV.__Widget.ButtonBase">
-        <item name="android:background">@android:drawable/list_selector_background</item>
-    </style>
-
-    <style name="Widget.AV.AddressView">
+    <style name="AV.__Widget.AddressViewBase" parent="Widget.AV">
         <item name="av__readOnly">false</item>
         <item name="av__textAppearance">@android:style/TextAppearance.Medium</item>
+        <item name="av__buttonPadding">@dimen/aet__vertical_margin_small</item>
         <item name="av__cancelIcon">@drawable/av__ic_navigation_cancel_holo_dark</item>
         <item name="av__myLocationIcon">@drawable/av__ic_device_access_location_found_holo_dark</item>
         <item name="av__dropDownBackground">@drawable/av__menu_dropdown_panel_holo_dark</item>
+    </style>
+
+    <style name="Widget.AV.AddressView" parent="AV.__Widget.AddressViewBase">
+        <item name="av__buttonBackground">@android:drawable/list_selector_background</item>
     </style>
 
     <style name="Widget.AV.AddressView.Light">
@@ -61,5 +62,5 @@
         <item name="av__myLocationIcon">@drawable/av__ic_device_access_location_found_holo_light</item>
         <item name="av__dropDownBackground">@drawable/av__menu_dropdown_panel_holo_light</item>
     </style>
-    
+
 </resources>

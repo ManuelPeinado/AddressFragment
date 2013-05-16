@@ -3,6 +3,8 @@
 
     <declare-styleable name="AddressView">
         <attr name="av__textAppearance" format="reference" />
+        <attr name="av__buttonBackground" format="reference" />
+        <attr name="av__buttonPadding" format="dimension" />
         <attr name="av__readOnly" format="boolean" />
         <attr name="av__showMyLocation" format="boolean" />
         <attr name="av__cancelIcon" format="reference" />

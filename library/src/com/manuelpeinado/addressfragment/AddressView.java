@@ -78,14 +78,14 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
      * This button is also used to cancel the current edition when the edittext
      * has focus
      */
-    private ImageView mUseMyLocationBtn;
+    private ImageView mMyLocationButton;
     private ProgressBar mProgressBar;
     private boolean mWaitingForFirstLocationFix;
     private boolean mShowingProgressBar;
     private boolean mPaused = true;
     private boolean mReadOnly;
     /**
-     * If false, the my location button is now shown. This is useful in
+     * If false, the my location button is not shown. This is useful in
      * applications where for some reason the device location is not available,
      * and so manual input is the only choice.
      */
@@ -101,6 +101,8 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private int mMyLocationIcon;
     private int mDropDownBackground;
     private int mTextAppearance;
+    private int mButtonBackground;
+    private int mButtonPadding;
     /**
      * If true, instead of using the real location of the device we use a
      * simulated location that goes moves from Washington Square to Marcus
@@ -177,8 +179,8 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         // We use this listener to find out when the user has selected a item from the autocompletion dropdown
         mAddressEditText.setOnItemClickListener(this);
         mAddressEditText.setOnFocusChangeListener(this);
-        mUseMyLocationBtn = (ImageView) findViewById(R.id.useMyLocationButton);
-        mUseMyLocationBtn.setOnClickListener(this);
+        mMyLocationButton = (ImageView) findViewById(R.id.useMyLocationButton);
+        mMyLocationButton.setOnClickListener(this);
 
         parseAttrs(attrs, defStyle);
         mInitializing = false;
@@ -193,15 +195,19 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             mMyLocationIcon = a.getResourceId(R.styleable.AddressView_av__myLocationIcon, 0);
             mDropDownBackground = a.getResourceId(R.styleable.AddressView_av__dropDownBackground, 0);
             mTextAppearance = a.getResourceId(R.styleable.AddressView_av__textAppearance, 0);
+            mButtonBackground = a.getResourceId(R.styleable.AddressView_av__buttonBackground, 0);
+            mButtonPadding = (int)a.getDimension(R.styleable.AddressView_av__buttonPadding, 0);
             a.recycle();
         }
         
         // Default visibility of the "my location" button is determined by whether we are in read-only mode
         mShowMyLocationButton = !mReadOnly;
-        mUseMyLocationBtn.setImageResource(mMyLocationIcon);
+        mMyLocationButton.setImageResource(mMyLocationIcon);
         setReadOnly(mReadOnly);
         mAddressEditText.setDropDownBackgroundResource(mDropDownBackground);
         mAddressEditText.setTextAppearance(getContext(), mTextAppearance);
+        mMyLocationButton.setBackgroundResource(mButtonBackground);
+        mMyLocationButton.setPadding(mButtonPadding, mButtonPadding, mButtonPadding, mButtonPadding);
         setShowMyLocation(mShowMyLocation, mInitializing);
     }
 
@@ -581,13 +587,13 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             mAddressEditText.setPadding(mAddressEditTextPadding[0], mAddressEditTextPadding[1],
                     mAddressEditTextPadding[2] + additionalRightPadding, mAddressEditTextPadding[3]);
             if (shouldHideButton) {
-                mUseMyLocationBtn.setVisibility(View.INVISIBLE);
+                mMyLocationButton.setVisibility(View.INVISIBLE);
                 mProgressBar.setVisibility(View.INVISIBLE);
                 return;
             }
         }
         boolean shouldShowMyLocationBtn = mShowMyLocationButton && !mShowingProgressBar;
-        mUseMyLocationBtn.setVisibility(shouldShowMyLocationBtn ? View.VISIBLE : View.INVISIBLE);
+        mMyLocationButton.setVisibility(shouldShowMyLocationBtn ? View.VISIBLE : View.INVISIBLE);
         mProgressBar.setVisibility(mShowingProgressBar ? View.VISIBLE : View.INVISIBLE);
     }
 
@@ -634,10 +640,10 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
                 Utils.forceShowVirtualKeyboard(getContext());
             }
             hideProgressBar();
-            mUseMyLocationBtn.setImageResource(mCancelIcon);
+            mMyLocationButton.setImageResource(mCancelIcon);
             pauseLocationProvider();
         } else {
-            mUseMyLocationBtn.setImageResource(mMyLocationIcon);
+            mMyLocationButton.setImageResource(mMyLocationIcon);
         }
         updateButtonVisibility();
     }

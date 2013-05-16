@@ -1,10 +1,20 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="StyledAddressView" parent="Widget.AV.AddressView">
-        
+    <style name="AddressView" parent="Widget.AV.AddressView"></style>
+
+    <style name="AddressView.Light" parent="Widget.AV.AddressView.Light"></style>
+
+    <style name="AddressView.Light.Styled">
+        <item name="av__textAppearance">@style/RedText</item>
+        <item name="av__cancelIcon">@drawable/ic_cancel_red</item>
+        <item name="av__myLocationIcon">@drawable/ic_compass_red</item>
+        <item name="av__buttonBackground">@drawable/background_selector_red</item>
+        <item name="av__buttonPadding">12dp</item>
     </style>
-    <style name="StyledAddressView.Light" parent="Widget.AV.AddressView.Light">
-        
+
+    <style name="RedText" parent="@android:style/TextAppearance.Small">
+        <item name="android:textColor">#AC00</item>
+        <item name="android:textStyle">bold</item>
     </style>
-    
+
 </resources>

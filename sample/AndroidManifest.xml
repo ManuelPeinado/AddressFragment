@@ -71,7 +71,7 @@
         <activity
             android:name="com.manuelpeinado.addressfragment.demo.StylingActivity"
             android:label="@string/activity_title_styling"
-            android:theme="@style/AppTheme.StyledAddressView" />
+            android:theme="@style/AppTheme.Light.StyledAddressView" />
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"

@@ -27,7 +27,7 @@ public class StylingActivity extends SherlockFragmentActivity implements Address
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_map_read_only);
+        setContentView(R.layout.activity_map);
 
         FragmentManager fm = getSupportFragmentManager();
         SupportMapFragment mapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map);
