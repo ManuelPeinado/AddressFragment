@@ -13,6 +13,7 @@
     </style>
 
     <style name="AppTheme.Light.StyledAddressView">
+        <item name="android:autoCompleteTextViewStyle">@style/RedAutoCompleteTextView</item>
         <item name="av__addressViewStyle">@style/AddressView.Light.Styled</item>
     </style>
 

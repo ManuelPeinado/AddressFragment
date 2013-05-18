@@ -8,13 +8,18 @@
         <item name="av__textAppearance">@style/RedText</item>
         <item name="av__cancelIcon">@drawable/ic_cancel_red</item>
         <item name="av__myLocationIcon">@drawable/ic_compass_red</item>
-        <item name="av__buttonBackground">@drawable/background_selector_red</item>
+        <item name="av__buttonBackground">@drawable/list_selector_red</item>
         <item name="av__buttonPadding">12dp</item>
     </style>
 
     <style name="RedText" parent="@android:style/TextAppearance.Small">
         <item name="android:textColor">#AC00</item>
         <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="RedAutoCompleteTextView" parent="android:Widget.AutoCompleteTextView">
+        <item name="android:dropDownSelector">@drawable/list_selector_red</item>
+        <item name="android:background">@drawable/edit_text_red</item>
     </style>
 
 </resources>

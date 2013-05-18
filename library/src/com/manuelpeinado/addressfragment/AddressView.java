@@ -2,11 +2,13 @@ package com.manuelpeinado.addressfragment;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -62,7 +64,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private String mPrettyAddress;
     private GeocodingTask mGeocodingTask;
     private ReverseGeocodingTask mReverseGeocodingTask;
-    private static boolean MOCK_REVERSE_GEOCODING_FAILURE = false; 
+    private static boolean MOCK_REVERSE_GEOCODING_FAILURE = false;
     /**
      * A user-initiated reverse geocoding task is one which starts because the
      * user has clicked on the "cancel current edit" button, as opposed to the
@@ -99,7 +101,6 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     private boolean mInitializing = true;
     private int mCancelIcon;
     private int mMyLocationIcon;
-    private int mDropDownBackground;
     private int mTextAppearance;
     private int mButtonBackground;
     private int mButtonPadding;
@@ -160,51 +161,63 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         setOrientation(LinearLayout.HORIZONTAL);
         setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-        // TODO call this using reflection
-        // setLayoutTransition(new LayoutTransition());
-
         LayoutInflater.from(context).inflate(R.layout.aet__default_layout, this);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         mAddressEditText = (AutoCompleteTextView) findViewById(R.id.addressEditText);
+        initAddressEditText();
         mAddressEditTextPadding = Utils.getPadding(mAddressEditText);
         mButtonSize = getResources().getDimension(R.dimen.aet__action_button_size);
+
+        mMyLocationButton = (ImageView) findViewById(R.id.useMyLocationButton);
+        mMyLocationButton.setOnClickListener(this);
+
+        parseAttrs(attrs, defStyle);
+
+        mInitializing = false;
+    }
+
+    private void initAddressEditText() {
+        mAddressEditText.setFocusable(true);
+        mAddressEditText.setFocusableInTouchMode(true);
+        mAddressEditText.setClickable(true);
+        mAddressEditText.setThreshold(2);
+        mAddressEditText.setHint(R.string.aet__address_edit_text_hint);
+        mAddressEditText.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+        mAddressEditText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        mAddressEditText.setMaxLines(1);
+        mAddressEditText.setSingleLine(true);
+        mAddressEditText.setSelectAllOnFocus(true);
 
         // This is important or else we get bitten by this:
         // http://stackoverflow.com/questions/15024892/two-searchviews-in-one-activity-and-screen-rotation
         mAddressEditText.setSaveEnabled(false);
         mAddressEditText.setTag(getTag());
-        mAddressEditText.setAdapter(new AutocompleteAddressAdapter(context));
+        mAddressEditText.setAdapter(new AutocompleteAddressAdapter(getContext()));
         // We use this listener to find out when the user has clicked "Done" on the virtual keyboard
         mAddressEditText.setOnEditorActionListener(this);
         // We use this listener to find out when the user has selected a item from the autocompletion dropdown
         mAddressEditText.setOnItemClickListener(this);
         mAddressEditText.setOnFocusChangeListener(this);
-        mMyLocationButton = (ImageView) findViewById(R.id.useMyLocationButton);
-        mMyLocationButton.setOnClickListener(this);
-
-        parseAttrs(attrs, defStyle);
-        mInitializing = false;
     }
 
     void parseAttrs(AttributeSet attrs, int defStyle) {
         if (attrs != null) {
-            TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.AddressView, defStyle, R.style.Widget_AV_AddressView);
+            TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.AddressView, defStyle,
+                    R.style.Widget_AV_AddressView);
             mReadOnly = a.getBoolean(R.styleable.AddressView_av__readOnly, mReadOnly);
             mShowMyLocation = a.getBoolean(R.styleable.AddressView_av__showMyLocation, mShowMyLocation);
             mCancelIcon = a.getResourceId(R.styleable.AddressView_av__cancelIcon, 0);
             mMyLocationIcon = a.getResourceId(R.styleable.AddressView_av__myLocationIcon, 0);
-            mDropDownBackground = a.getResourceId(R.styleable.AddressView_av__dropDownBackground, 0);
             mTextAppearance = a.getResourceId(R.styleable.AddressView_av__textAppearance, 0);
             mButtonBackground = a.getResourceId(R.styleable.AddressView_av__buttonBackground, 0);
-            mButtonPadding = (int)a.getDimension(R.styleable.AddressView_av__buttonPadding, 0);
+            mButtonPadding = (int) a.getDimension(R.styleable.AddressView_av__buttonPadding, 0);
             a.recycle();
         }
-        
+
         // Default visibility of the "my location" button is determined by whether we are in read-only mode
         mShowMyLocationButton = !mReadOnly;
         mMyLocationButton.setImageResource(mMyLocationIcon);
         setReadOnly(mReadOnly);
-        mAddressEditText.setDropDownBackgroundResource(mDropDownBackground);
         mAddressEditText.setTextAppearance(getContext(), mTextAppearance);
         mMyLocationButton.setBackgroundResource(mButtonBackground);
         mMyLocationButton.setPadding(mButtonPadding, mButtonPadding, mButtonPadding, mButtonPadding);
@@ -550,7 +563,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
      * modifiable programmatically
      */
     public void setReadOnly(boolean value) {
-        if (!mInitializing  && mReadOnly == value) {
+        if (!mInitializing && mReadOnly == value) {
             return;
         }
         mReadOnly = value;
@@ -636,7 +649,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     public void onFocusChange(View v, boolean hasFocus) {
         mHasFocus = hasFocus;
         if (hasFocus) {
-            if (!mReadOnly) { 
+            if (!mReadOnly) {
                 Utils.forceShowVirtualKeyboard(getContext());
             }
             hideProgressBar();

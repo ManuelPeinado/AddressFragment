@@ -7,7 +7,6 @@
 
         <AutoCompleteTextView
             android:id="@id/addressEditText"
-            style="@style/Widget.AV.Light.AutoCompleteTextView"
             android:layout_width="match_parent"
             android:layout_height="@dimen/aet__action_button_size" />
 

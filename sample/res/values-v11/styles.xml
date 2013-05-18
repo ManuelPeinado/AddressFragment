@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated with http://android-holo-colors.com -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="RedAutoCompleteTextView" parent="android:Widget.Holo.Light.AutoCompleteTextView">
+        <item name="android:dropDownSelector">@drawable/list_selector_red</item>
+		<item name="android:popupBackground">@color/extra_light_red</item>
+        <item name="android:background">@drawable/edit_text_red</item>
+    </style>
+
+</resources>

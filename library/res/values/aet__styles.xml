@@ -5,31 +5,6 @@
 
     <style name="Widget.AV" />
 
-    <style name="AV.__Widget.AutoCompleteTextView" parent="Widget.AV">
-        <item name="android:focusable">true</item>
-        <item name="android:focusableInTouchMode">true</item>
-        <item name="android:clickable">true</item>
-        <item name="android:completionHintView">@android:layout/simple_dropdown_item_1line</item>
-        <item name="android:dropDownWidth">wrap_content</item>
-        <item name="android:layout_gravity">left|bottom</item>
-        <item name="android:completionThreshold">2</item>
-        <item name="android:hint">@string/aet__address_edit_text_hint</item>
-        <item name="android:imeOptions">actionSearch</item>
-        <item name="android:inputType">textNoSuggestions</item>
-        <item name="android:maxLines">1</item>
-        <item name="android:selectAllOnFocus">true</item>
-    </style>
-
-    <style name="Widget.AV.AutoCompleteTextView" parent="AV.__Widget.AutoCompleteTextView">
-        <item name="android:textColor">@color/aet__primary_text_holo_dark</item>
-        <item name="android:dropDownSelector">@drawable/abs__list_selector_holo_dark</item>
-    </style>
-
-    <style name="Widget.AV.Light.AutoCompleteTextView" parent="AV.__Widget.AutoCompleteTextView">
-        <item name="android:textColor">@color/aet__primary_text_holo_light</item>
-        <item name="android:dropDownSelector">@drawable/abs__list_selector_holo_light</item>
-    </style>
-
     <style name="AV.__Widget.Button" parent="Widget.AV">
         <item name="android:layout_gravity">right</item>
         <item name="android:indeterminate">true</item>
@@ -50,7 +25,6 @@
         <item name="av__buttonPadding">@dimen/aet__vertical_margin_small</item>
         <item name="av__cancelIcon">@drawable/av__ic_navigation_cancel_holo_dark</item>
         <item name="av__myLocationIcon">@drawable/av__ic_device_access_location_found_holo_dark</item>
-        <item name="av__dropDownBackground">@drawable/av__menu_dropdown_panel_holo_dark</item>
     </style>
 
     <style name="Widget.AV.AddressView" parent="AV.__Widget.AddressViewBase">
@@ -60,7 +34,6 @@
     <style name="Widget.AV.AddressView.Light">
         <item name="av__cancelIcon">@drawable/av__ic_navigation_cancel_holo_light</item>
         <item name="av__myLocationIcon">@drawable/av__ic_device_access_location_found_holo_light</item>
-        <item name="av__dropDownBackground">@drawable/av__menu_dropdown_panel_holo_light</item>
     </style>
 
 </resources>
