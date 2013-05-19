@@ -13,6 +13,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.manuelpeinado.geocodingtask.DefaultAddressFormatter;
+
 public class Utils {
     private static final String LOCATION_FMT_STR = "%.4f, %.4f";
     private static final int RANDOM_TAG_KEY = new Random().nextInt();
@@ -30,13 +32,7 @@ public class Utils {
     }
 
     public static String prettyPrint(Address result, String separator) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(result.getAddressLine(0));
-        for (int i = 1; i <= result.getMaxAddressLineIndex(); ++i) {
-            builder.append(separator);
-            builder.append(result.getAddressLine(i));
-        }
-        return builder.toString();
+        return DefaultAddressFormatter.format(result, separator);
     }
 
     public static String prettyPrint(Location location) {

@@ -1,8 +1,9 @@
 package com.manuelpeinado.addressfragment;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Location;
 import android.os.Parcel;
@@ -27,14 +28,18 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
-import com.manuelpeinado.addressfragment.GeocodingTask.GeocodingTaskListener;
 import com.manuelpeinado.addressfragment.SingleShotLocationTask.SingleShotLocationListener;
+import com.manuelpeinado.geocodingtask.AddressListDialog;
+import com.manuelpeinado.geocodingtask.GeocodingListener;
+import com.manuelpeinado.geocodingtask.GeocodingTask;
+import com.manuelpeinado.geocodingtask.ReverseGeocodingListener;
+import com.manuelpeinado.geocodingtask.ReverseGeocodingTask;
 
 /**
  *
  */
 public class AddressView extends LinearLayout implements IAddressProvider, OnClickListener,
-        ReverseGeocodingTask.ReverseGeocodingListener, OnEditorActionListener, GeocodingTaskListener,
+        ReverseGeocodingListener, OnEditorActionListener, GeocodingListener,
         OnItemClickListener, OnFocusChangeListener {
 
     protected static final String TAG = AddressView.class.getSimpleName();
@@ -504,7 +509,7 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
     }
 
     @Override
-    public void onReverseGeocodingResultReady(ReverseGeocodingTask sender, Address result) {
+    public void onReverseGeocodingResultReady(Object sender, Address result) {
         mReverseGeocodingTask = null;
         hideProgressBar();
         // TODO use a different method to notify error to listeners
@@ -516,7 +521,8 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
             disableLocationProvider();
             return;
         }
-        mLastLocation = sender.getLocation();
+        ReverseGeocodingTask task = (ReverseGeocodingTask) sender;
+        mLastLocation = task.getLocation();
         String newPrettyAddress = Utils.prettyPrint(result);
         Log.v(TAG, "Reverse geocoding of location " + Utils.prettyPrint(mLastLocation) + " finished; address is "
                 + newPrettyAddress);
@@ -665,41 +671,56 @@ public class AddressView extends LinearLayout implements IAddressProvider, OnCli
         Log.v(TAG, "Starting geocoding of address " + addressText);
         cancelPendingTasks();
         mGeocodingTask = new GeocodingTask((FragmentActivity) getContext());
-        mGeocodingTask.showDisambiguationDialog(showDisambiguationDialog);
         mGeocodingTask.setListener(this);
+        mGeocodingTask.setSelectFirstResult(!showDisambiguationDialog);
         mGeocodingTask.execute(addressText);
         showProgressBar();
     }
-
+    
     @Override
-    public void onGeocodingSuccess(GeocodingTask sender, Address result) {
+    public void onGeocodingSuccess(Object sender, ArrayList<Address> result) {
         mGeocodingTask = null;
         hideProgressBar();
-        mLastLocation = Utils.addressToLocation(result);
-        String newPrettyAddress = Utils.prettyPrint(result);
-        Log.v(TAG,
-                "Geocoding of address " + sender.getAddressText() + " finished; location is "
-                        + Utils.prettyPrint(mLastLocation));
-        if (newPrettyAddress.equals(mPrettyAddress)) {
-            Log.v(TAG, "Ignoring new address because it's the same as previous one");
-            return;
+        if (result.size() > 1) {
+            showDisambiguationDialog(result);
+        } else { 
+            Address address = result.get(0);
+            mLastLocation = Utils.addressToLocation(address);
+            String newPrettyAddress = Utils.prettyPrint(address);
+            GeocodingTask task = (GeocodingTask) sender;
+            Log.v(TAG,
+                    "Geocoding of address " + task.getAddressText() + " finished; location is "
+                            + Utils.prettyPrint(mLastLocation));
+            if (newPrettyAddress.equals(mPrettyAddress)) {
+                Log.v(TAG, "Ignoring new address because it's the same as previous one");
+                return;
+            }
+            mPrettyAddress = newPrettyAddress;
+            mAddress = address;
+            updateText();
+            notifyListener(null, true);
         }
-        mPrettyAddress = newPrettyAddress;
-        mAddress = result;
-        updateText();
-        notifyListener(null, true);
+    }
+
+    private void showDisambiguationDialog(ArrayList<Address> result) {
+        AddressListDialog dlg = AddressListDialog.newInstance(result);
+        dlg.setListener(this);
+        FragmentActivity fragmentActivity = (FragmentActivity) getContext(); 
+        dlg.show(fragmentActivity.getSupportFragmentManager(), "AdressView#addressListDialogFragment");
     }
 
     @Override
-    public void onGeocodingFailure(GeocodingTask sender) {
-        Log.w(TAG, "Geocoding of address " + sender.getAddressText() + " failed");
+    public void onGeocodingFailure(Object sender) {
+        GeocodingTask task = (GeocodingTask) sender;
+        Log.w(TAG, "Geocoding of address " + task.getAddressText() + " failed");
         hideProgressBar();
         cancelCurrentEdit();
     }
 
     @Override
-    public void onGeocodingCancel(GeocodingTask sender) {
-        Log.v(TAG, "Geocoding of address " + sender.getAddressText() + " canceled by user");
+    public void onGeocodingCanceled(Object sender) {
+        GeocodingTask task = (GeocodingTask) sender;
+        Log.v(TAG, "Geocoding of address " + task.getAddressText() + " canceled by user");
         hideProgressBar();
         cancelCurrentEdit();
     }
